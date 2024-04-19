@@ -1,12 +1,28 @@
 import subprocess
 
 
-def main():
+def get_arguments_manually():
+    s = input("Enter the list of projected attributes (comma-separated): ")
+    n = int(input("Enter the number of grouping variables(comma-separated): "))
+    v = input("Enter the list of grouping attributes (comma-separated): ")
+    f = input(f"Enter list of aggregate functions for the grouping variables (comma-separated): ")
+    sigma = [input(f"Enter predicate for grouping variable {i+1}: ") for i in range(n)]
+    g = input("Enter predicate for the 'having' clause: ")
+    return s, n, v, f, sigma, g
+
+
+def main(s, n, v, f, sigma, g):
     """
     This is the generator code. It should take in the MF structure and generate the code
     needed to run the query. That generated code should be saved to a 
     file (e.g. _generated.py) and then run.
     """
+    attributes = s.split(',')
+    grouping_attributes = v.split(',')
+    aggregate_functions = f.split(',')
+    predicates = sigma
+    having_clause = g
+
 
     body = """
     for row in cur:
@@ -57,4 +73,5 @@ if "__main__" == __name__:
 
 
 if "__main__" == __name__:
-    main()
+    args = get_arguments_manually()
+    main(*args)
