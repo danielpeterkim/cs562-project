@@ -48,8 +48,7 @@ def query():
     password = os.getenv('PASSWORD')
     dbname = os.getenv('DBNAME')
 
-    conn = psycopg2.connect("dbname="+dbname+" user="+user+" password="+password,
-                            cursor_factory=psycopg2.extras.DictCursor)
+    conn = psycopg2.connect(host = 'localhost', dbname = 'postgres', user = 'postgres', password = 'password', port = 5432)
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
     
@@ -59,14 +58,49 @@ def query():
     return tabulate.tabulate(_global,
                         headers="keys", tablefmt="psql")
 
+def write_h_class_to_file(grouping_attributes, aggregates):
+    with open("_generated.py", "w") as file:
+        file.write("class H:\\n")
+        file.write("    def __init__(self):\\n")
+        
+        # Initialize grouping attributes, ensuring each attribute is stripped of whitespace
+        for attr in grouping_attributes.split(','):
+            cleaned_attr = attr.strip()
+            file.write(f"        self.{cleaned_attr} = None  # Placeholder for actual data type\\n")
+        
+            
+        # Initialize aggregate attributes, stripping whitespace as well
+        for agg in aggregates.split(','):
+            cleaned_agg = agg.strip()
+            file.write(f"        self.{cleaned_agg} = None  # Placeholder for initial aggregate value\\n")
+
+for row in cur:
+        key = tuple(row[attr] for attr in grouping_attributes)
+        if key not in H_table:
+            H_table[key] = {agg: None for agg in aggregate_functions}
+            # Initialize aggregates here based on the first grouping variable conditions
+
+    # Additional scans for each grouping variable
+    for i in range(1, n):
+        cur.execute("SELECT * FROM sales")
+        for row in cur:
+            key = tuple(row[attr] for attr in grouping_attributes)
+            if key in H_table and eval(predicates[i]):  # Simplified condition check
+                # Update H_table based on aggregates and predicate
+                pass
+
+
 def main():
     print(query())
+    s, n, v, f, sigma, g = get_arguments_manually()
+    write_h_class_to_file(v, f)
+
     
 if "__main__" == __name__:
     main()
     """
 
-    # Write the generated code to a file
+    # Write the generated code to a filep
     open("_generated.py", "w").write(tmp)
     # Execute the generated code
     subprocess.run(["python", "_generated.py"])
