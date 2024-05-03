@@ -30,22 +30,28 @@ def query():
 
 class H:
 
-    def __init__(mysillyobject, age, networth):
+    def __init__(mysillyobject, age, test1, networth, test2):
         
         
         mysillyobject.age = age
         
         
+        mysillyobject. test1 =  test1
+        
+        
         
         mysillyobject.networth = networth
+        
+        
+        mysillyobject. test2 =  test2
         
     
 
     def myfunc(abc):
-        print("Hello my name is " + str(abc.age) + str(abc.networth))
+        print("Hello my name is " + str(abc.age) + " " + str(abc.networth) + " " + str(abc.test1) + " " + str(abc.test2))
 def main():
     print(query())
-    p1 = H( 36, 12)
+    p1 = H( 36, 12, "test1", "test2")
     p1.myfunc() 
     
     
