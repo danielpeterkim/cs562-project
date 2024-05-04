@@ -80,6 +80,7 @@ def query():
             
     
     
+    
     table_data = [vars(inst) for inst in instances.values()]
     # return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
     return "dud"
