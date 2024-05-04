@@ -74,7 +74,6 @@ def main(s, n, v, f, sigma, g):
                    isUsed = False
                 if isUsed:
                     agg_instance.append(row)            
-        print(agg_instance)
         cur.scroll(0, mode='absolute')
     """
     
@@ -126,7 +125,7 @@ def query():
 
     conn = psycopg2.connect(host = 'localhost', dbname = dbname, user = user, password = password, port = 5432)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * FROM sales")
+    cur.execute("SELECT * FROM sales")  
     {body}
     
     table_data = [vars(inst) for inst in instances.values()]

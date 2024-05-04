@@ -37,7 +37,7 @@ def query():
 
     conn = psycopg2.connect(host = 'localhost', dbname = dbname, user = user, password = password, port = 5432)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * FROM sales")
+    cur.execute("SELECT * FROM sales")  
     
     instances = {}
     
@@ -67,13 +67,11 @@ def query():
                 if row[i[0]] != i[1]:
                     isUsed = False
             if isUsed:
-                print("1.state=='NJ'")
-                print(row['state']=='NJ')
                 if not(eval("row['state']=='NJ'")):
                    isUsed = False
                 if isUsed:
                     agg_instance.append(row)            
-        print(agg_instance)
+        print(agg_instance[0]['cust'])
         cur.scroll(0, mode='absolute')
     
     
