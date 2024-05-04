@@ -27,16 +27,33 @@ def main(s, n, v, f, sigma, g):
     needed to run the query. That generated code should be saved to a 
     file (e.g. _generated.py) and then run.
     """
-    attributes = s.split(',')
+    slt = s.split(',')
     grouping_attributes = v.split(',')
     aggregate_functions = f.split(',')
     predicates = sigma
     having_clause = g
 
-    body = """
+
+    
+    body = f"""
+    instances = {{}}
+    
     for row in cur:
-        if row['quant'] > 10:
-            _global.append(row)
+        # Create a unique key
+        attributesFormattedForKey = ""
+        hInstan = ""
+        for x in {grouping_attributes}:
+            attributesFormattedForKey += f"{{row[x]}}-"
+            hInstan += f"{{x}} = {{row[x]}},"
+        attributesFormattedForKey = attributesFormattedForKey[:-1]
+        hInstan = hInstan[:-1]
+        #adds placeholder values in H class for aggregate functions
+        for y in {aggregate_functions}:
+            hInstan += f",{{y}} = None"
+        key = "{{attributesFormattedForKey}}"
+        if key not in instances:
+            print(hInstan)
+            instances[key] = H(hInstan)
     """
     
     groupv =""""""
@@ -49,7 +66,7 @@ def main(s, n, v, f, sigma, g):
         """
     for x in aggregate_functions:
         aggv += f"""
-        
+
         mysillyobject.{x} = {x}
         """
      
@@ -57,10 +74,12 @@ def main(s, n, v, f, sigma, g):
     def __init__(mysillyobject, {select}):
         {groupv}
         {aggv}
+        
     def printAllClassAttr(abc):
         attrs = vars(abc)
         for attr, value in attrs.items():
             print(f'{{attr}}: {{value}}')
+    
     """
 
     # Note: The f allows formatting with variables.
@@ -86,12 +105,10 @@ def query():
     conn = psycopg2.connect(host = 'localhost', dbname = dbname, user = user, password = password, port = 5432)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT * FROM sales")
-    
-    _global = []
     {body}
     
-    return tabulate.tabulate(_global,
-                        headers="keys", tablefmt="psql")
+    table_data = [vars(inst) for inst in instances.values()]
+    return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
 
 
 def main():

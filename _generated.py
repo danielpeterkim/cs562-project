@@ -15,16 +15,18 @@ class H:
         mysillyobject.cust = cust
         
         
-        
+
         mysillyobject.sum_1_quant = sum_1_quant
         
-        
+
         mysillyobject. sum_2_quant =  sum_2_quant
+        
         
     def printAllClassAttr(abc):
         attrs = vars(abc)
         for attr, value in attrs.items():
             print(f'{attr}: {value}')
+    
     
 def query():
     load_dotenv()
@@ -37,15 +39,28 @@ def query():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT * FROM sales")
     
-    _global = []
+    instances = {}
     
     for row in cur:
-        if row['quant'] > 10:
-            _global.append(row)
+        # Create a unique key
+        attributesFormattedForKey = ""
+        hInstan = ""
+        for x in ['cust']:
+            attributesFormattedForKey += f"{row[x]}-"
+            hInstan += f"{x} = {row[x]},"
+        attributesFormattedForKey = attributesFormattedForKey[:-1]
+        hInstan = hInstan[:-1]
+        #adds placeholder values in H class for aggregate functions
+        for y in ['sum_1_quant', ' sum_2_quant']:
+            hInstan += f",{y} = None"
+        key = "{attributesFormattedForKey}"
+        if key not in instances:
+            print(hInstan)
+            instances[key] = H(hInstan)
     
     
-    return tabulate.tabulate(_global,
-                        headers="keys", tablefmt="psql")
+    table_data = [vars(inst) for inst in instances.values()]
+    return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
 
 
 def main():
