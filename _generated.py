@@ -65,25 +65,33 @@ def query():
         for y in ['sum_1_quant', 'count_1_quant', 'min_1_quant', 'max_1_quant', 'sum_2_quant']:
             hInstan[y] = None
         key = attributesFormattedForKey
-        print(key)
         if key not in instances:
             instances[key] = H(**hInstan)
 
             
-    # for key, h_row in instances.items():
-    #     agg_instance = {}
-    #     for row in cur:
-    #         split_key = key.split('-')
-
-
-                
+    for key, h_row in instances.items():
+        agg_instance = []
+        split_key = key.split('@')
+        split_key = [pair.split('-') for pair in split_key]
+        print(split_key)
+        for row in cur:
+            isUsed = True
+            for i in split_key:
+                if row[i[0]] != i[1]:
+                    isUsed = False
+            print(isUsed)
+            if isUsed == True:
+                print("1.state=='NJ'")
+                print(row['state']=='NJ')
+                if NOT(eval(row['state']=='NJ')):
+                   isUsed = False
+                if isUsed == True:
+                    agg_instance.append(row)            
             
     
     
-    
     table_data = [vars(inst) for inst in instances.values()]
-    # return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
-    return "dud"
+    return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
 
 def main():
     print(query())

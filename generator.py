@@ -1,5 +1,5 @@
 import subprocess
-
+import re
 
 def get_arguments_manually():
     s = input("Enter the list of projected attributes (comma-separated): ")
@@ -20,6 +20,12 @@ def get_arguments_from_file(filename):
         sigma = [line.strip() for line in lines[4:4+n]]
         g = lines[4+n].strip()
     return s, n, v, f, sigma, g
+
+
+def transform_condition_string(input_string):
+    pattern = r"(\d+)\.([a-zA-Z_]+)"
+    transformed_string = re.sub(pattern, r"row['\2']", input_string)
+    return transformed_string
 
 def main(s, n, v, f, sigma, g):
     """
@@ -55,22 +61,23 @@ def main(s, n, v, f, sigma, g):
 
             
     for key, h_row in instances.items():
-        agg_instance = {{}}
-        split_key = key.split("@")
-        for i in split_key:
-            i = i.split("-")
+        agg_instance = []
+        split_key = key.split('@')
+        split_key = [pair.split('-') for pair in split_key]
+        print(split_key)
         for row in cur:
             isUsed = True
             for i in split_key:
                 if row[i[0]] != i[1]:
                     isUsed = False
+            print(isUsed)
             if isUsed == True:
-                
-                
-
-
-
-                
+                print("{predicates[0]}")
+                print({transform_condition_string(predicates[0])})
+                if NOT(eval({transform_condition_string(predicates[0])})):
+                   isUsed = False
+                if isUsed == True:
+                    agg_instance.append(row)            
             
     """
     
