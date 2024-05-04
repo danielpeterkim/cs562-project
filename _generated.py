@@ -9,14 +9,26 @@ from dotenv import load_dotenv
 
 class H:
 
-    def __init__(mysillyobject, cust, sum_1_quant, sum_2_quant):
+    def __init__(mysillyobject, cust, prod, sum_1_quant, count_1_quant, min_1_quant, max_1_quant, sum_2_quant):
         
         
         mysillyobject.cust = cust
         
         
+        mysillyobject.prod = prod
+        
+        
 
         mysillyobject.sum_1_quant = sum_1_quant
+        
+
+        mysillyobject.count_1_quant = count_1_quant
+        
+
+        mysillyobject.min_1_quant = min_1_quant
+        
+
+        mysillyobject.max_1_quant = max_1_quant
         
 
         mysillyobject.sum_2_quant = sum_2_quant
@@ -45,20 +57,24 @@ def query():
         # Create a unique key
         attributesFormattedForKey = ""
         hInstan = {}
-        for x in ['cust']:
+        for x in ['cust', 'prod']:
             attributesFormattedForKey += f"{row[x]}-"
             hInstan[x] = row[x]
         attributesFormattedForKey = attributesFormattedForKey[:-1]
         #adds placeholder values in H class for aggregate functions
-        for y in ['sum_1_quant', 'sum_2_quant']:
+        for y in ['sum_1_quant', 'count_1_quant', 'min_1_quant', 'max_1_quant', 'sum_2_quant']:
             hInstan[y] = None
         key = attributesFormattedForKey
         if key not in instances:
             instances[key] = H(**hInstan)
     
     
+    
     table_data = [vars(inst) for inst in instances.values()]
-    return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
+    hams = [item for item in cur if item['prod'] == 'Ham']
+
+    # return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
+    return hams
 
 
 def main():
