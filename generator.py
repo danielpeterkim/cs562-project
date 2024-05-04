@@ -52,6 +52,14 @@ def main(s, n, v, f, sigma, g):
         key = attributesFormattedForKey
         if key not in instances:
             instances[key] = H(**hInstan)
+
+    for key, h_row in instances.items():
+        agg_instance = {{}}
+        for row in cur:
+            split_key = key.split('-')
+            
+                
+            
     """
     
     groupv =""""""
