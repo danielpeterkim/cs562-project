@@ -58,27 +58,24 @@ def main(s, n, v, f, sigma, g):
         key = attributesFormattedForKey
         if key not in instances:
             instances[key] = H(**hInstan)
-
-            
+    cur.scroll(0, mode='absolute')
+    
     for key, h_row in instances.items():
         agg_instance = []
         split_key = key.split('@')
         split_key = [pair.split('-') for pair in split_key]
-        print(split_key)
         for row in cur:
             isUsed = True
             for i in split_key:
                 if row[i[0]] != i[1]:
                     isUsed = False
-            print(isUsed)
-            if isUsed == True:
-                print("{predicates[0]}")
-                print({transform_condition_string(predicates[0])})
-                if NOT(eval({transform_condition_string(predicates[0])})):
+            if isUsed:
+                if not(eval("{transform_condition_string(predicates[0])}")):
                    isUsed = False
-                if isUsed == True:
+                if isUsed:
                     agg_instance.append(row)            
-            
+        print(agg_instance)
+        cur.scroll(0, mode='absolute')
     """
     
     groupv =""""""

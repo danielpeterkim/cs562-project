@@ -9,26 +9,14 @@ from dotenv import load_dotenv
 
 class H:
 
-    def __init__(mysillyobject, cust, prod, sum_1_quant, count_1_quant, min_1_quant, max_1_quant, sum_2_quant):
+    def __init__(mysillyobject, cust, sum_1_quant, sum_2_quant):
         
         
         mysillyobject.cust = cust
         
         
-        mysillyobject.prod = prod
-        
-        
 
         mysillyobject.sum_1_quant = sum_1_quant
-        
-
-        mysillyobject.count_1_quant = count_1_quant
-        
-
-        mysillyobject.min_1_quant = min_1_quant
-        
-
-        mysillyobject.max_1_quant = max_1_quant
         
 
         mysillyobject.sum_2_quant = sum_2_quant
@@ -57,37 +45,36 @@ def query():
         # Create a unique key
         attributesFormattedForKey = ""
         hInstan = {}
-        for x in ['cust', 'prod']:
+        for x in ['cust']:
             attributesFormattedForKey += f"{x}-{row[x]}@"
             hInstan[x] = row[x]
         attributesFormattedForKey = attributesFormattedForKey[:-1]
         #adds placeholder values in H class for aggregate functions
-        for y in ['sum_1_quant', 'count_1_quant', 'min_1_quant', 'max_1_quant', 'sum_2_quant']:
+        for y in ['sum_1_quant', 'sum_2_quant']:
             hInstan[y] = None
         key = attributesFormattedForKey
         if key not in instances:
             instances[key] = H(**hInstan)
-
-            
+    cur.scroll(0, mode='absolute')
+    
     for key, h_row in instances.items():
         agg_instance = []
         split_key = key.split('@')
         split_key = [pair.split('-') for pair in split_key]
-        print(split_key)
         for row in cur:
             isUsed = True
             for i in split_key:
                 if row[i[0]] != i[1]:
                     isUsed = False
-            print(isUsed)
-            if isUsed == True:
+            if isUsed:
                 print("1.state=='NJ'")
                 print(row['state']=='NJ')
-                if NOT(eval(row['state']=='NJ')):
+                if not(eval("row['state']=='NJ'")):
                    isUsed = False
-                if isUsed == True:
+                if isUsed:
                     agg_instance.append(row)            
-            
+        print(agg_instance)
+        cur.scroll(0, mode='absolute')
     
     
     table_data = [vars(inst) for inst in instances.values()]
