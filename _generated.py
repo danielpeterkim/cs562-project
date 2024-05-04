@@ -72,48 +72,52 @@ def query():
                         isUsed = False
                     if isUsed:
                         agg_instance.append(row)  
-            print(agg_instance)
-            # for x in ['sum_1_quant', 'sum_2_quant']: # for calculating the aggregate functions for the H-class table
-            #     split_x = x.split("_")
-            #     if split_x[0] == "sum" and split_x[1] == str(z) :
-            #         sum = 0
-            #         for l in agg_instance: 
-            #             sum += getattr(l, split_x[2])
+            for x in ['sum_1_quant', 'sum_2_quant']: # for calculating the aggregate functions for the H-class table
+                split_x = x.split("_")
+                if split_x[0] == "sum" and split_x[1] == str(z) :
+                    sum = 0
+                    for l in agg_instance: 
+                        sum += l[split_x[2]]
+                    setattr(instances[key], x, sum)
                     
-            #     if split_x[0] == "count" AND split_x[1] == str(z) :
-            #         count = agg_instance.length
+                if split_x[0] == "count" and split_x[1] == str(z) :
+                    count = agg_instance.length
+                    setattr(instances[key], x, count)
 
-            #     if split_x[0] == "min" AND split_x[1] == str(z) :
-            #         first = True
-            #         if first== True:
-            #             for i in agg_instance:
-            #                 if first:
-            #                     min = getattr(l, split_x[2])
-            #                     first = False
-            #                 else:
-            #                     if (l.(split_x[2]) < min):
-            #                         min = getattr(l, split_x[2])
+                if split_x[0] == "min" and split_x[1] == str(z) :
+                    first = True
+                    if first== True:
+                        for i in agg_instance:
+                            if first:
+                                min = l[split_x[2]]
+                                first = False
+                            else:
+                                if (getattr(l, split_x[2]) < min):
+                                    min = l[split_x[2]]
+                    setattr(instances[key], x, min)
 
-            #     if split_x[0] == "max" AND split_x[1] == str(z) :
-            #         first = True
-            #         if first== True:
-            #             for i in agg_instance:
-            #                 if first:
-            #                     max = getattr(l, split_x[2])
-            #                     first = False
-            #                 else:
-            #                     if (l.(split_x[2]) > max):
-            #                         max = getattr(l, split_x[2])
+                if split_x[0] == "max" and split_x[1] == str(z) :
+                    first = True
+                    if first== True:
+                        for i in agg_instance:
+                            if first:
+                                max = l[split_x[2]]
+                                first = False
+                            else:
+                                if (l[split_x[2]] > max):
+                                    max = l[split_x[2]]
+                    setattr(instances[key], x, max)
                 
-            #     if split_x[0] == "avg" AND split_x[1] == str(z) :
-            #         sum = 0
-            #         count = agg_instance.length
-            #         for l in agg_instance: 
-            #             sum += getattr(l, split_x[2])
-            #         avg = sum/count
+                if split_x[0] == "avg" and split_x[1] == str(z) :
+                    sum = 0
+                    count = agg_instance.length
+                    for l in agg_instance: 
+                        sum += l[split_x[2]]
+                    avg = sum/count
+                    setattr(instances[key], x, avg)
                                
             cur.scroll(0, mode='absolute')
-            None
+        None
 
     
     
