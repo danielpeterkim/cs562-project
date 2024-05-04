@@ -39,7 +39,10 @@ def main(s, n, v, f, sigma, g):
     predicates = sigma
     having_clause = g
 
-
+    z_prime = 0
+    def increment_z_prime():
+        nonlocal z_prime
+        z_prime += 1
     
     body = f"""
     instances = {{}}
@@ -60,21 +63,64 @@ def main(s, n, v, f, sigma, g):
             instances[key] = H(**hInstan)
     cur.scroll(0, mode='absolute')
     
-    for key, h_row in instances.items():
-        agg_instance = []
-        split_key = key.split('@')
-        split_key = [pair.split('-') for pair in split_key]
-        for row in cur:
-            isUsed = True
-            for i in split_key:
-                if row[i[0]] != i[1]:
-                    isUsed = False
-            if isUsed:
-                if not(eval("{transform_condition_string(predicates[0])}")):
-                   isUsed = False
+    for z in range({n}):
+        for key, h_row in instances.items():
+            agg_instance = []
+            split_key = key.split('@')
+            split_key = [pair.split('-') for pair in split_key]
+            for row in cur:
+                isUsed = True
+                for i in split_key:
+                    if row[i[0]] != i[1]:
+                        isUsed = False
                 if isUsed:
-                    agg_instance.append(row)            
-        cur.scroll(0, mode='absolute')
+                    if not(eval("{transform_condition_string(predicates[z_prime])}")):
+                        isUsed = False
+                    if isUsed:
+                        agg_instance.append(row)  
+            print(agg_instance)
+            # for x in {aggregate_functions}: # for calculating the aggregate functions for the H-class table
+            #     split_x = x.split("_")
+            #     if split_x[0] == "sum" and split_x[1] == str(z) :
+            #         sum = 0
+            #         for l in agg_instance: 
+            #             sum += getattr(l, split_x[2])
+                    
+            #     if split_x[0] == "count" AND split_x[1] == str(z) :
+            #         count = agg_instance.length
+
+            #     if split_x[0] == "min" AND split_x[1] == str(z) :
+            #         first = True
+            #         if first== True:
+            #             for i in agg_instance:
+            #                 if first:
+            #                     min = getattr(l, split_x[2])
+            #                     first = False
+            #                 else:
+            #                     if (l.(split_x[2]) < min):
+            #                         min = getattr(l, split_x[2])
+
+            #     if split_x[0] == "max" AND split_x[1] == str(z) :
+            #         first = True
+            #         if first== True:
+            #             for i in agg_instance:
+            #                 if first:
+            #                     max = getattr(l, split_x[2])
+            #                     first = False
+            #                 else:
+            #                     if (l.(split_x[2]) > max):
+            #                         max = getattr(l, split_x[2])
+                
+            #     if split_x[0] == "avg" AND split_x[1] == str(z) :
+            #         sum = 0
+            #         count = agg_instance.length
+            #         for l in agg_instance: 
+            #             sum += getattr(l, split_x[2])
+            #         avg = sum/count
+                               
+            cur.scroll(0, mode='absolute')
+            {increment_z_prime()}
+
     """
     
     groupv =""""""
