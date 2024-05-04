@@ -19,7 +19,7 @@ class H:
         mysillyobject.sum_1_quant = sum_1_quant
         
 
-        mysillyobject. sum_2_quant =  sum_2_quant
+        mysillyobject.sum_2_quant = sum_2_quant
         
         
     def printAllClassAttr(abc):
@@ -44,19 +44,17 @@ def query():
     for row in cur:
         # Create a unique key
         attributesFormattedForKey = ""
-        hInstan = ""
+        hInstan = {}
         for x in ['cust']:
             attributesFormattedForKey += f"{row[x]}-"
-            hInstan += f"{x} = {row[x]},"
+            hInstan[x] = row[x]
         attributesFormattedForKey = attributesFormattedForKey[:-1]
-        hInstan = hInstan[:-1]
         #adds placeholder values in H class for aggregate functions
-        for y in ['sum_1_quant', ' sum_2_quant']:
-            hInstan += f",{y} = None"
-        key = "{attributesFormattedForKey}"
+        for y in ['sum_1_quant', 'sum_2_quant']:
+            hInstan[y] = None
+        key = attributesFormattedForKey
         if key not in instances:
-            print(hInstan)
-            instances[key] = H(hInstan)
+            instances[key] = H(**hInstan)
     
     
     table_data = [vars(inst) for inst in instances.values()]

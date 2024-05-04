@@ -27,9 +27,9 @@ def main(s, n, v, f, sigma, g):
     needed to run the query. That generated code should be saved to a 
     file (e.g. _generated.py) and then run.
     """
-    slt = s.split(',')
-    grouping_attributes = v.split(',')
-    aggregate_functions = f.split(',')
+    slt = [item.strip() for item in s.split(',')]
+    grouping_attributes = [item.strip() for item in v.split(',')]
+    aggregate_functions = [item.strip() for item in f.split(',')]
     predicates = sigma
     having_clause = g
 
@@ -41,19 +41,17 @@ def main(s, n, v, f, sigma, g):
     for row in cur:
         # Create a unique key
         attributesFormattedForKey = ""
-        hInstan = ""
+        hInstan = {{}}
         for x in {grouping_attributes}:
             attributesFormattedForKey += f"{{row[x]}}-"
-            hInstan += f"{{x}} = {{row[x]}},"
+            hInstan[x] = row[x]
         attributesFormattedForKey = attributesFormattedForKey[:-1]
-        hInstan = hInstan[:-1]
         #adds placeholder values in H class for aggregate functions
         for y in {aggregate_functions}:
-            hInstan += f",{{y}} = None"
-        key = "{{attributesFormattedForKey}}"
+            hInstan[y] = None
+        key = attributesFormattedForKey
         if key not in instances:
-            print(hInstan)
-            instances[key] = H(hInstan)
+            instances[key] = H(**hInstan)
     """
     
     groupv =""""""
