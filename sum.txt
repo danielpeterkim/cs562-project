@@ -4,3 +4,4 @@ cust
 sum_1_quant, sum_2_quant
 1.state='NJ'
 2.state='NY'
+
