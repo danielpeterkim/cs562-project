@@ -43,7 +43,7 @@ def main(s, n, v, f, sigma, g):
         attributesFormattedForKey = ""
         hInstan = {{}}
         for x in {grouping_attributes}:
-            attributesFormattedForKey += f"{{row[x]}}-"
+            attributesFormattedForKey += f"{{x}}-{{row[x]}}@"
             hInstan[x] = row[x]
         attributesFormattedForKey = attributesFormattedForKey[:-1]
         #adds placeholder values in H class for aggregate functions
@@ -53,11 +53,23 @@ def main(s, n, v, f, sigma, g):
         if key not in instances:
             instances[key] = H(**hInstan)
 
+            
     for key, h_row in instances.items():
         agg_instance = {{}}
+        split_key = key.split("@")
+        for i in split_key:
+            i = i.split("-")
         for row in cur:
-            split_key = key.split('-')
-            
+            isUsed = True
+            for i in split_key:
+                if row[i[0]] != i[1]:
+                    isUsed = False
+            if isUsed == True:
+                
+                
+
+
+
                 
             
     """
@@ -115,7 +127,6 @@ def query():
     
     table_data = [vars(inst) for inst in instances.values()]
     return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
-
 
 def main():
     print(query())

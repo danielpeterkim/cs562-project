@@ -58,20 +58,31 @@ def query():
         attributesFormattedForKey = ""
         hInstan = {}
         for x in ['cust', 'prod']:
-            attributesFormattedForKey += f"{row[x]}-"
+            attributesFormattedForKey += f"{x}-{row[x]}@"
             hInstan[x] = row[x]
         attributesFormattedForKey = attributesFormattedForKey[:-1]
         #adds placeholder values in H class for aggregate functions
         for y in ['sum_1_quant', 'count_1_quant', 'min_1_quant', 'max_1_quant', 'sum_2_quant']:
             hInstan[y] = None
         key = attributesFormattedForKey
+        print(key)
         if key not in instances:
             instances[key] = H(**hInstan)
+
+            
+    # for key, h_row in instances.items():
+    #     agg_instance = {}
+    #     for row in cur:
+    #         split_key = key.split('-')
+
+
+                
+            
     
     
     table_data = [vars(inst) for inst in instances.values()]
-    return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
-
+    # return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
+    return "dud"
 
 def main():
     print(query())
