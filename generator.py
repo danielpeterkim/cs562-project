@@ -47,7 +47,7 @@ def having_to_condition(input_string):
     pattern = r'\b(\w+_\d+_\w+)\b'
     def replacer(match):
         variable = match.group(1)
-        return f"row['{variable}']"
+        return f"h_row.{variable}"
     having_condition = re.sub(pattern, replacer, input_string)
     return having_condition
 def main(s, n, v, f, sigma, g):
@@ -102,6 +102,7 @@ def main(s, n, v, f, sigma, g):
                 for i in split_key:
                     if row[i[0]] != i[1]:
                         isUsed = False
+                        break
                 if isUsed:
                     if not(eval("{transform_condition_string(predicates[z])}")):
                         isUsed = False
@@ -153,17 +154,13 @@ def main(s, n, v, f, sigma, g):
     """
     
     # so having will go through each "row" of instance. if it doesn't fufill predicate's logic, then delte the row. else nothing
-    having = """ 
-    
-    transform_having = transform_condition_string(g)  
-    valid_instances = {}
-    for key, instance in instances.items():
-        if eval(transform_having, {}, vars(instance)):
-            valid_instances[key] = instance 
-
-    instances = valid_instances
-        
-
+    having = f""" 
+    keys_to_remove = []
+    for key, h_row in instances.items():
+        if not(eval("{having_to_condition(having_clause)}")):
+            keys_to_remove.append(key)
+    for key in keys_to_remove:
+        del instances[key]
     """
     
     
