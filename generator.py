@@ -108,22 +108,32 @@ def main(s, n, v, f, sigma, g):
         if key not in instances:
             instances[key] = H(**hInstan)
     cur.scroll(0, mode='absolute')
+    h_table_grouping_attr_time = time.time()
+    h_table_grouping_attr_time_total = h_table_grouping_attr_time - start_time
+    print(f"H Table Grouping Atrr executed in {{h_table_grouping_attr_time_total:.2f}} seconds.")
     """
     aggInstanceCode = """"""
     for z in range(n):
         aggInstanceCode += f"""
     predicate_string = "{transform_condition_string(predicates[z])}"
+    h_table_aggrefunc_time_start = time.time()
+
     for key, h_row in instances.items():
             agg_instance = []
             split_key = key.split('@')
             split_key = [pair.split('-') for pair in split_key]
+            such_that_time_start = time.time()
             for row in cur:
                 isUsed = True
                 if isUsed:
+                    such_that_time_start = time.time()
                     if not(eval(predicate_string)):
                         isUsed = False  
                     if isUsed:
                         agg_instance.append(row)  
+                    such_that_time_end = time.time()
+                    such_that_time_total =  such_that_time_end -  such_that_time_start
+                    print(f" Such That Mini Table {z} Time executed in {{such_that_time_total:.2f}} seconds.")
             for x in {aggregate_functions}: # for calculating the aggregate functions for the H-class table
                 split_x = x.split("_")
                 if split_x[0] == "sum" and split_x[1] == str({z + 1}) :
@@ -167,17 +177,25 @@ def main(s, n, v, f, sigma, g):
                     setattr(instances[key], x, avg)
                                
             cur.scroll(0, mode='absolute')
+    h_table_aggrefunc_time_end = time.time()
+    h_table_aggrefunc_time_total = h_table_aggrefunc_time_end - h_table_aggrefunc_time_start
+    print(f" H Table AggreFunc {z} Time executed in {{h_table_aggrefunc_time_total:.2f}} seconds.")
     """
     
     # so having will go through each "row" of instance. if it doesn't fufill predicate's logic, then delte the row. else nothing
     having = f""" 
     keys_to_remove = []
     if {having_clause != ""}:
+        having_time_start = time.time()
+        having_string = "{having_to_condition(having_clause)}"
         for key, h_row in instances.items():
-            if not(eval("{having_to_condition(having_clause)}")):
+            if not(eval(having_string)):
                 keys_to_remove.append(key)
         for key in keys_to_remove:
             del instances[key]
+        having_time_end = time.time()
+        having_time_total = having_time_end - having_time_start
+        print(f" Having Time executed in {{having_time_total:.2f}} seconds.")
     """
     
     
@@ -201,11 +219,6 @@ def main(s, n, v, f, sigma, g):
     def __init__(mysillyobject, {select}):
         {groupv}
         {aggv}
-        
-    def printAllClassAttr(abc):
-        attrs = vars(abc)
-        for attr, value in attrs.items():
-            print(f'{{attr}}: {{value}}')
     
     """
     
@@ -237,6 +250,7 @@ def query():
     cur.execute(f"{final_query}")  
     {body}
     {aggInstanceCode}
+    
     {having}
     end_time = time.time()
     elapsed_time = end_time - start_time
