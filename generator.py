@@ -65,7 +65,6 @@ def main(s, n, v, f, sigma, g):
     aggInstanceCode = """"""
     for z in range(n):
         aggInstanceCode += f"""
-    print({z})
     for key, h_row in instances.items():
         agg_instance = []
         split_key = key.split('@')
