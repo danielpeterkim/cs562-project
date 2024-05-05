@@ -2,6 +2,6 @@ cust, prod, sum_1_quant, count_1_quant, min_1_quant, max_1_quant, sum_2_quant
 2
 cust, prod
 sum_1_quant, count_1_quant, min_1_quant, max_1_quant, sum_2_quant
-1.state=='NJ'
-2.state=='NY'
+1.state=='NJ' and 1.year == 2012
+2.state=='NY' and 2.year == 2013
 

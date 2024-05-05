@@ -43,7 +43,6 @@ def main(s, n, v, f, sigma, g):
     aggregate_functions = [item.strip() for item in f.split(',')]
     predicates = sigma
     having_clause = g
-    
     body = f"""
     instances = {{}}
     
@@ -62,69 +61,70 @@ def main(s, n, v, f, sigma, g):
         if key not in instances:
             instances[key] = H(**hInstan)
     cur.scroll(0, mode='absolute')
-    
-    for z in range({n}):
-        for key, h_row in instances.items():
-            agg_instance = []
-            split_key = key.split('@')
-            split_key = [pair.split('-') for pair in split_key]
-            for row in cur:
-                isUsed = True
-                for i in split_key:
-                    if row[i[0]] != i[1]:
-                        isUsed = False
+    """
+    aggInstanceCode = """"""
+    for z in range(n):
+        aggInstanceCode += f"""
+    print({z})
+    for key, h_row in instances.items():
+        agg_instance = []
+        split_key = key.split('@')
+        split_key = [pair.split('-') for pair in split_key]
+        for row in cur:
+            isUsed = True
+            for i in split_key:
+                if row[i[0]] != i[1]:
+                    isUsed = False
+            if isUsed:
+                if not(eval("{transform_condition_string(predicates[z])}")):
+                    isUsed = False
                 if isUsed:
-                    if not(eval("{transform_condition_string(predicates[z_prime])}")):
-                        isUsed = False
-                    if isUsed:
-                        agg_instance.append(row)  
-            for x in {aggregate_functions}: # for calculating the aggregate functions for the H-class table
-                split_x = x.split("_")
-                if split_x[0] == "sum" and split_x[1] == str(z) :
-                    sum = 0
-                    for l in agg_instance: 
-                        sum += l[split_x[2]]
-                    setattr(instances[key], x, sum)
-                    
-                if split_x[0] == "count" and split_x[1] == str(z) :
-                    count = agg_instance.length
-                    setattr(instances[key], x, count)
-
-                if split_x[0] == "min" and split_x[1] == str(z) :
-                    first = True
-                    if first== True:
-                        for i in agg_instance:
-                            if first:
-                                min = l[split_x[2]]
-                                first = False
-                            else:
-                                if (getattr(l, split_x[2]) < min):
-                                    min = l[split_x[2]]
-                    setattr(instances[key], x, min)
-
-                if split_x[0] == "max" and split_x[1] == str(z) :
-                    first = True
-                    if first== True:
-                        for i in agg_instance:
-                            if first:
-                                max = l[split_x[2]]
-                                first = False
-                            else:
-                                if (l[split_x[2]] > max):
-                                    max = l[split_x[2]]
-                    setattr(instances[key], x, max)
+                    agg_instance.append(row)  
+        for x in {aggregate_functions}: # for calculating the aggregate functions for the H-class table
+            split_x = x.split("_")
+            if split_x[0] == "sum" and split_x[1] == str({z + 1}) :
+                sum = 0
+                for l in agg_instance: 
+                    sum += l[split_x[2]]
+                setattr(instances[key], x, sum)
                 
-                if split_x[0] == "avg" and split_x[1] == str(z) :
-                    sum = 0
-                    count = agg_instance.length
-                    for l in agg_instance: 
-                        sum += l[split_x[2]]
-                    avg = sum/count
-                    setattr(instances[key], x, avg)
-                               
-            cur.scroll(0, mode='absolute')
-        {increment_z_prime()}
+            if split_x[0] == "count" and split_x[1] == str({z + 1}) :
+                count = len(agg_instance)
+                setattr(instances[key], x, count)
 
+            if split_x[0] == "min" and split_x[1] == str({z + 1}) :
+                first = True
+                if first == True:
+                    for l in agg_instance:
+                        if first:
+                            min = l[split_x[2]]
+                            first = False
+                        else:
+                            if (l[split_x[2]] < min):
+                                min = l[split_x[2]]
+                setattr(instances[key], x, min)
+
+            if split_x[0] == "max" and split_x[1] == str({z + 1}) :
+                first = True
+                if first == True:
+                    for l in agg_instance:
+                        if first:
+                            max = l[split_x[2]]
+                            first = False
+                        else:
+                            if (l[split_x[2]] > max):
+                                max = l[split_x[2]]
+                setattr(instances[key], x, max)
+            
+            if split_x[0] == "avg" and split_x[1] == str({z + 1}) :
+                sum = 0
+                count = len(agg_instance)
+                for l in agg_instance: 
+                    sum += l[split_x[2]]
+                avg = sum/count
+                setattr(instances[key], x, avg)
+                               
+        cur.scroll(0, mode='absolute')
     """
     
     groupv =""""""
@@ -177,7 +177,7 @@ def query():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT * FROM sales")  
     {body}
-    
+    {aggInstanceCode}
     table_data = [vars(inst) for inst in instances.values()]
     return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
 
