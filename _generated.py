@@ -72,46 +72,44 @@ def query():
     
     print(0)
     for key, h_row in instances.items():
-        agg_instance = []
-        split_key = key.split('@')
-        split_key = [pair.split('-') for pair in split_key]
-        for row in cur:
-            isUsed = True
-            for i in split_key:
-                if row[i[0]] != i[1]:
-                    isUsed = False
-            if isUsed:
-                if not(eval("row['state']=='NJ' and row['year'] == 2012")):
-                    isUsed = False
+            agg_instance = []
+            split_key = key.split('@')
+            split_key = [pair.split('-') for pair in split_key]
+            for row in cur:
+                isUsed = True
+                for i in split_key:
+                    if row[i[0]] != i[1]:
+                        isUsed = False
                 if isUsed:
-                    agg_instance.append(row)  
-        for x in ['sum_1_quant', 'count_1_quant', 'min_1_quant', 'max_1_quant', 'sum_2_quant']: # for calculating the aggregate functions for the H-class table
-            split_x = x.split("_")
-            if split_x[0] == "sum" and split_x[1] == str(1) :
-                sum = 0
-                for l in agg_instance: 
-                    sum += l[split_x[2]]
-                setattr(instances[key], x, sum)
-                
-            if split_x[0] == "count" and split_x[1] == str(1) :
-                count = len(agg_instance)
-                setattr(instances[key], x, count)
+                    if not(eval("row['state']=='NJ' and row['year'] == 2016")):
+                        isUsed = False
+                    if isUsed:
+                        agg_instance.append(row)  
+            for x in ['sum_1_quant', 'count_1_quant', 'min_1_quant', 'max_1_quant', 'sum_2_quant']: # for calculating the aggregate functions for the H-class table
+                split_x = x.split("_")
+                if split_x[0] == "sum" and split_x[1] == str(1) :
+                    sum = 0
+                    for l in agg_instance: 
+                        sum += l[split_x[2]]
+                    setattr(instances[key], x, sum)
+                    
+                if split_x[0] == "count" and split_x[1] == str(1) :
+                    count = len(agg_instance)
+                    setattr(instances[key], x, count)
 
-            if split_x[0] == "min" and split_x[1] == str(1) :
-                first = True
-                if first == True:
+                if split_x[0] == "min" and split_x[1] == str(1) :
+                    first = True
                     for l in agg_instance:
                         if first:
                             min = l[split_x[2]]
                             first = False
                         else:
-                            if (l[split_x[2]] < min):
+                            if l[split_x[2]] < min:
                                 min = l[split_x[2]]
-                setattr(instances[key], x, min)
+                    setattr(instances[key], x, min)
 
-            if split_x[0] == "max" and split_x[1] == str(1) :
-                first = True
-                if first == True:
+                if split_x[0] == "max" and split_x[1] == str(1) :
+                    first = True
                     for l in agg_instance:
                         if first:
                             max = l[split_x[2]]
@@ -119,60 +117,58 @@ def query():
                         else:
                             if (l[split_x[2]] > max):
                                 max = l[split_x[2]]
-                setattr(instances[key], x, max)
-            
-            if split_x[0] == "avg" and split_x[1] == str(1) :
-                sum = 0
-                count = len(agg_instance)
-                for l in agg_instance: 
-                    sum += l[split_x[2]]
-                avg = sum/count
-                setattr(instances[key], x, avg)
+                    setattr(instances[key], x, max)
+                
+                if split_x[0] == "avg" and split_x[1] == str(1) :
+                    sum = 0
+                    count = len(agg_instance)
+                    for l in agg_instance: 
+                        sum += l[split_x[2]]
+                    avg = sum/count
+                    setattr(instances[key], x, avg)
                                
-        cur.scroll(0, mode='absolute')
+            cur.scroll(0, mode='absolute')
     
     print(1)
     for key, h_row in instances.items():
-        agg_instance = []
-        split_key = key.split('@')
-        split_key = [pair.split('-') for pair in split_key]
-        for row in cur:
-            isUsed = True
-            for i in split_key:
-                if row[i[0]] != i[1]:
-                    isUsed = False
-            if isUsed:
-                if not(eval("row['state']=='NY' and row['year'] == 2013")):
-                    isUsed = False
+            agg_instance = []
+            split_key = key.split('@')
+            split_key = [pair.split('-') for pair in split_key]
+            for row in cur:
+                isUsed = True
+                for i in split_key:
+                    if row[i[0]] != i[1]:
+                        isUsed = False
                 if isUsed:
-                    agg_instance.append(row)  
-        for x in ['sum_1_quant', 'count_1_quant', 'min_1_quant', 'max_1_quant', 'sum_2_quant']: # for calculating the aggregate functions for the H-class table
-            split_x = x.split("_")
-            if split_x[0] == "sum" and split_x[1] == str(2) :
-                sum = 0
-                for l in agg_instance: 
-                    sum += l[split_x[2]]
-                setattr(instances[key], x, sum)
-                
-            if split_x[0] == "count" and split_x[1] == str(2) :
-                count = len(agg_instance)
-                setattr(instances[key], x, count)
+                    if not(eval("row['state']=='NY' and row['year'] == 2018")):
+                        isUsed = False
+                    if isUsed:
+                        agg_instance.append(row)  
+            for x in ['sum_1_quant', 'count_1_quant', 'min_1_quant', 'max_1_quant', 'sum_2_quant']: # for calculating the aggregate functions for the H-class table
+                split_x = x.split("_")
+                if split_x[0] == "sum" and split_x[1] == str(2) :
+                    sum = 0
+                    for l in agg_instance: 
+                        sum += l[split_x[2]]
+                    setattr(instances[key], x, sum)
+                    
+                if split_x[0] == "count" and split_x[1] == str(2) :
+                    count = len(agg_instance)
+                    setattr(instances[key], x, count)
 
-            if split_x[0] == "min" and split_x[1] == str(2) :
-                first = True
-                if first == True:
+                if split_x[0] == "min" and split_x[1] == str(2) :
+                    first = True
                     for l in agg_instance:
                         if first:
                             min = l[split_x[2]]
                             first = False
                         else:
-                            if (l[split_x[2]] < min):
+                            if l[split_x[2]] < min:
                                 min = l[split_x[2]]
-                setattr(instances[key], x, min)
+                    setattr(instances[key], x, min)
 
-            if split_x[0] == "max" and split_x[1] == str(2) :
-                first = True
-                if first == True:
+                if split_x[0] == "max" and split_x[1] == str(2) :
+                    first = True
                     for l in agg_instance:
                         if first:
                             max = l[split_x[2]]
@@ -180,17 +176,17 @@ def query():
                         else:
                             if (l[split_x[2]] > max):
                                 max = l[split_x[2]]
-                setattr(instances[key], x, max)
-            
-            if split_x[0] == "avg" and split_x[1] == str(2) :
-                sum = 0
-                count = len(agg_instance)
-                for l in agg_instance: 
-                    sum += l[split_x[2]]
-                avg = sum/count
-                setattr(instances[key], x, avg)
+                    setattr(instances[key], x, max)
+                
+                if split_x[0] == "avg" and split_x[1] == str(2) :
+                    sum = 0
+                    count = len(agg_instance)
+                    for l in agg_instance: 
+                        sum += l[split_x[2]]
+                    avg = sum/count
+                    setattr(instances[key], x, avg)
                                
-        cur.scroll(0, mode='absolute')
+            cur.scroll(0, mode='absolute')
     
     table_data = [vars(inst) for inst in instances.values()]
     return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
