@@ -152,8 +152,8 @@ def main(s, n, v, f, sigma, g):
             cur.scroll(0, mode='absolute')
     """
     
-    
-    
+    # so having will go through each "row" of instance. if it doesn't fufill predicate's logic, then delte the row. else nothing
+    having = """"""
     
     
     
@@ -210,6 +210,7 @@ def query():
     cur.execute(f"{final_query}")  
     {body}
     {aggInstanceCode}
+    {having}
     table_data = [vars(inst) for inst in instances.values()]
     return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
 
