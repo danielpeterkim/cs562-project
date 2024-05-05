@@ -44,23 +44,27 @@ def transform_condition_string(input_string):
     return add_h_row_prefix(transformed_string)
 
 def add_h_row_prefix(input_string):
+    pattern = r'\b(' + '|'.join(re.escape(k) for k in ['cust', 'prod', 'day', 'month', 'year', 'state', 'quant', 'date']) + r')\b(?!\s*\])'
+
     def replacer(match):
-        full_match, before, keyword, after = match.group(0), match.group(1), match.group(2), match.group(3)
-        print( "1: " + full_match)
-        print("2: " +before)
-        print("3: " +keyword)
-        print("4: " +after)
-        # check if the keyword is already handled or part of 'row[]'
-        if before.strip() == '[' and after.strip() == ']':
-            return full_match
-        elif before.strip().endswith('.'):
-            return full_match
-        else:
-            return f"{before}h_row.{keyword}{after}"
-    pattern = fr"(\W?)\b({'|'.join(['cust', 'prod', 'day', 'month', 'year', 'state', 'quant', 'date'])})\b(\W?)"
-    transformed_string = re.sub(pattern, replacer, input_string, flags=re.IGNORECASE)
+        word = match.group(0)
+        return f'h_row.{word}'
+
+    transformed_string = input_string
+    protected_parts = re.findall(r"row\['[^']+'\]", input_string)
+    protected_replacements = {part: f"PROTECTED{idx}" for idx, part in enumerate(protected_parts)}
+
+    for placeholder, part in protected_replacements.items():
+        transformed_string = transformed_string.replace(placeholder, part)
+
+    transformed_string = re.sub(pattern, replacer, transformed_string, flags=re.IGNORECASE)
+
+    for part, placeholder in protected_replacements.items():
+        transformed_string = transformed_string.replace(placeholder, part)
 
     return transformed_string
+
+
 def having_to_condition(input_string):
     pattern = r'\b(\w+_\d+_\w+)\b'
     def replacer(match):

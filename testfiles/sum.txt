@@ -2,6 +2,6 @@ cust, sum_1_quant, sum_2_quant
 2
 cust
 sum_1_quant, sum_2_quant
-1.state=='NJ'
-2.state=='NY'
+1.cust == cust and 1.state=='NJ'
+2.cust == cust and 2.state=='NY'
 
