@@ -21,6 +21,22 @@ def get_arguments_from_file(filename):
         g = lines[4+n].strip()
     return s, n, v, f, sigma, g
 
+def process_conditions(conditions):
+    processed_conditions = []
+    for condition in conditions:
+        condition = re.sub(r'\d+\.', '', condition)  # remove numbers followed by "."
+        parts = condition.split('=')
+        if len(parts) == 2 and parts[0].strip() != parts[1].strip():
+            processed_conditions.append(condition)
+    
+    final_condition = ' OR '.join(f"({cond})" for cond in processed_conditions)
+    return final_condition
+
+def check_query_keywords(query):
+    query_lower = query.lower()
+    
+    found_keywords = [keyword for keyword in ['cust', 'prod', 'day', 'month', 'year', 'state', 'quant', 'date'] if keyword in query_lower]
+    return found_keywords
 
 def transform_condition_string(input_string):
     pattern = r"(\d+)\.([a-zA-Z_]+)"
@@ -45,7 +61,16 @@ def main(s, n, v, f, sigma, g):
     aggregate_functions = [item.strip() for item in f.split(',')]
     predicates = sigma
     having_clause = g
+    combined_input = f"{s} {v} {f} {' '.join(sigma)} {g}"
+    select_clause = ', '.join(check_query_keywords(combined_input))
+    where_clause = process_conditions(sigma) if sigma else ""
+
+    final_query = f"SELECT {select_clause} FROM sales"
+    if where_clause:
+        final_query += f" WHERE {where_clause}"
+
     body = f"""
+    
     instances = {{}}
     
     for row in cur:
@@ -67,66 +92,82 @@ def main(s, n, v, f, sigma, g):
     aggInstanceCode = """"""
     for z in range(n):
         aggInstanceCode += f"""
+    print({z})
     for key, h_row in instances.items():
-        agg_instance = []
-        split_key = key.split('@')
-        split_key = [pair.split('-') for pair in split_key]
-        for row in cur:
-            isUsed = True
-            for i in split_key:
-                if row[i[0]] != i[1]:
-                    isUsed = False
-            if isUsed:
-                if not(eval("{transform_condition_string(predicates[z])}")):
-                    isUsed = False
+            agg_instance = []
+            split_key = key.split('@')
+            split_key = [pair.split('-') for pair in split_key]
+            for row in cur:
+                isUsed = True
+                for i in split_key:
+                    if row[i[0]] != i[1]:
+                        isUsed = False
                 if isUsed:
-                    agg_instance.append(row)  
-        for x in {aggregate_functions}: # for calculating the aggregate functions for the H-class table
-            split_x = x.split("_")
-            if split_x[0] == "sum" and split_x[1] == str({z + 1}) :
-                sum = 0
-                for l in agg_instance: 
-                    sum += l[split_x[2]]
-                setattr(instances[key], x, sum)
-                
-            if split_x[0] == "count" and split_x[1] == str({z + 1}) :
-                count = len(agg_instance)
-                setattr(instances[key], x, count)
+                    if not(eval("{transform_condition_string(predicates[z])}")):
+                        isUsed = False
+                    if isUsed:
+                        agg_instance.append(row)  
+            for x in {aggregate_functions}: # for calculating the aggregate functions for the H-class table
+                split_x = x.split("_")
+                if split_x[0] == "sum" and split_x[1] == str({z + 1}) :
+                    sum = 0
+                    for l in agg_instance: 
+                        sum += l[split_x[2]]
+                    setattr(instances[key], x, sum)
+                    
+                if split_x[0] == "count" and split_x[1] == str({z + 1}) :
+                    count = len(agg_instance)
+                    setattr(instances[key], x, count)
 
-            if split_x[0] == "min" and split_x[1] == str({z + 1}) :
-                first = True
-                min = None
-                for l in agg_instance:
-                    if first:
-                        min = l[split_x[2]]
-                        first = False
-                    else:
-                        if (l[split_x[2]] < min):
+                if split_x[0] == "min" and split_x[1] == str({z + 1}) :
+                    first = True
+                    for l in agg_instance:
+                        if first:
                             min = l[split_x[2]]
-                setattr(instances[key], x, min)
+                            first = False
+                        else:
+                            if l[split_x[2]] < min:
+                                min = l[split_x[2]]
+                    setattr(instances[key], x, min)
 
-            if split_x[0] == "max" and split_x[1] == str({z + 1}) :
-                first = True
-                max = None
-                for l in agg_instance:
-                    if first:
-                        max = l[split_x[2]]
-                        first = False
-                    else:
-                        if (l[split_x[2]] > max):
+                if split_x[0] == "max" and split_x[1] == str({z + 1}) :
+                    first = True
+                    for l in agg_instance:
+                        if first:
                             max = l[split_x[2]]
-                setattr(instances[key], x, max)
-            
-            if split_x[0] == "avg" and split_x[1] == str({z + 1}) :
-                sum = 0
-                count = len(agg_instance)
-                for l in agg_instance: 
-                    sum += l[split_x[2]]
-                avg = sum/count
-                setattr(instances[key], x, avg)
+                            first = False
+                        else:
+                            if (l[split_x[2]] > max):
+                                max = l[split_x[2]]
+                    setattr(instances[key], x, max)
+                
+                if split_x[0] == "avg" and split_x[1] == str({z + 1}) :
+                    sum = 0
+                    count = len(agg_instance)
+                    for l in agg_instance: 
+                        sum += l[split_x[2]]
+                    avg = sum/count
+                    setattr(instances[key], x, avg)
                                
-        cur.scroll(0, mode='absolute')
+            cur.scroll(0, mode='absolute')
     """
+    
+    # so having will go through each "row" of instance. if it doesn't fufill predicate's logic, then delte the row. else nothing
+    having = """ 
+    
+    transform_having = transform_condition_string(g)  
+    valid_instances = {}
+    for key, instance in instances.items():
+        if eval(transform_having, {}, vars(instance)):
+            valid_instances[key] = instance 
+
+    instances = valid_instances
+        
+
+    """
+    
+    
+
     
     groupv =""""""
     select = v + ", " + f
@@ -153,6 +194,7 @@ def main(s, n, v, f, sigma, g):
             print(f'{{attr}}: {{value}}')
     
     """
+    
 
     # Note: The f allows formatting with variables.
     #       Also, note the indentation is preserved.
@@ -176,9 +218,10 @@ def query():
 
     conn = psycopg2.connect(host = 'localhost', dbname = dbname, user = user, password = password, port = 5432)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * FROM sales")  
+    cur.execute(f"{final_query}")  
     {body}
     {aggInstanceCode}
+    {having}
     table_data = [vars(inst) for inst in instances.values()]
     return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
 
