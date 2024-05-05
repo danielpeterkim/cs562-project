@@ -94,26 +94,26 @@ def main(s, n, v, f, sigma, g):
 
             if split_x[0] == "min" and split_x[1] == str({z + 1}) :
                 first = True
-                if first == True:
-                    for l in agg_instance:
-                        if first:
+                min = None
+                for l in agg_instance:
+                    if first:
+                        min = l[split_x[2]]
+                        first = False
+                    else:
+                        if (l[split_x[2]] < min):
                             min = l[split_x[2]]
-                            first = False
-                        else:
-                            if (l[split_x[2]] < min):
-                                min = l[split_x[2]]
                 setattr(instances[key], x, min)
 
             if split_x[0] == "max" and split_x[1] == str({z + 1}) :
                 first = True
-                if first == True:
-                    for l in agg_instance:
-                        if first:
+                max = None
+                for l in agg_instance:
+                    if first:
+                        max = l[split_x[2]]
+                        first = False
+                    else:
+                        if (l[split_x[2]] > max):
                             max = l[split_x[2]]
-                            first = False
-                        else:
-                            if (l[split_x[2]] > max):
-                                max = l[split_x[2]]
                 setattr(instances[key], x, max)
             
             if split_x[0] == "avg" and split_x[1] == str({z + 1}) :

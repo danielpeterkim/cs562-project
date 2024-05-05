@@ -81,7 +81,7 @@ def query():
                 if row[i[0]] != i[1]:
                     isUsed = False
             if isUsed:
-                if not(eval("row['state']=='NJ' and row['year'] == 2012")):
+                if not(eval("row['state']=='NJ' and row['year'] == 2016")):
                     isUsed = False
                 if isUsed:
                     agg_instance.append(row)  
@@ -99,26 +99,26 @@ def query():
 
             if split_x[0] == "min" and split_x[1] == str(1) :
                 first = True
-                if first == True:
-                    for l in agg_instance:
-                        if first:
+                min = None
+                for l in agg_instance:
+                    if first:
+                        min = l[split_x[2]]
+                        first = False
+                    else:
+                        if (l[split_x[2]] < min):
                             min = l[split_x[2]]
-                            first = False
-                        else:
-                            if (l[split_x[2]] < min):
-                                min = l[split_x[2]]
                 setattr(instances[key], x, min)
 
             if split_x[0] == "max" and split_x[1] == str(1) :
                 first = True
-                if first == True:
-                    for l in agg_instance:
-                        if first:
+                max = None
+                for l in agg_instance:
+                    if first:
+                        max = l[split_x[2]]
+                        first = False
+                    else:
+                        if (l[split_x[2]] > max):
                             max = l[split_x[2]]
-                            first = False
-                        else:
-                            if (l[split_x[2]] > max):
-                                max = l[split_x[2]]
                 setattr(instances[key], x, max)
             
             if split_x[0] == "avg" and split_x[1] == str(1) :
@@ -142,7 +142,7 @@ def query():
                 if row[i[0]] != i[1]:
                     isUsed = False
             if isUsed:
-                if not(eval("row['state']=='NY' and row['year'] == 2013")):
+                if not(eval("row['state']=='NY' and row['year'] == 2018")):
                     isUsed = False
                 if isUsed:
                     agg_instance.append(row)  
@@ -160,26 +160,26 @@ def query():
 
             if split_x[0] == "min" and split_x[1] == str(2) :
                 first = True
-                if first == True:
-                    for l in agg_instance:
-                        if first:
+                min = None
+                for l in agg_instance:
+                    if first:
+                        min = l[split_x[2]]
+                        first = False
+                    else:
+                        if (l[split_x[2]] < min):
                             min = l[split_x[2]]
-                            first = False
-                        else:
-                            if (l[split_x[2]] < min):
-                                min = l[split_x[2]]
                 setattr(instances[key], x, min)
 
             if split_x[0] == "max" and split_x[1] == str(2) :
                 first = True
-                if first == True:
-                    for l in agg_instance:
-                        if first:
+                max = None
+                for l in agg_instance:
+                    if first:
+                        max = l[split_x[2]]
+                        first = False
+                    else:
+                        if (l[split_x[2]] > max):
                             max = l[split_x[2]]
-                            first = False
-                        else:
-                            if (l[split_x[2]] > max):
-                                max = l[split_x[2]]
                 setattr(instances[key], x, max)
             
             if split_x[0] == "avg" and split_x[1] == str(2) :
