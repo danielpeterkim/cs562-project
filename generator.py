@@ -153,10 +153,21 @@ def main(s, n, v, f, sigma, g):
     """
     
     # so having will go through each "row" of instance. if it doesn't fufill predicate's logic, then delte the row. else nothing
-    having = """"""
+    having = """ 
+    
+    transform_having = transform_condition_string(g)  
+    valid_instances = {}
+    for key, instance in instances.items():
+        if eval(transform_having, {}, vars(instance)):
+            valid_instances[key] = instance 
+
+    instances = valid_instances
+        
+
+    """
     
     
-    
+
     
     groupv =""""""
     select = v + ", " + f
