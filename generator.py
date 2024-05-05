@@ -41,8 +41,26 @@ def check_query_keywords(query):
 def transform_condition_string(input_string):
     pattern = r"(\d+)\.([a-zA-Z_]+)"
     transformed_string = re.sub(pattern, r"row['\2']", input_string)
-    return transformed_string
+    return add_h_row_prefix(transformed_string)
 
+def add_h_row_prefix(input_string):
+    def replacer(match):
+        full_match, before, keyword, after = match.group(0), match.group(1), match.group(2), match.group(3)
+        print( "1: " + full_match)
+        print("2: " +before)
+        print("3: " +keyword)
+        print("4: " +after)
+        # check if the keyword is already handled or part of 'row[]'
+        if before.strip() == '[' and after.strip() == ']':
+            return full_match
+        elif before.strip().endswith('.'):
+            return full_match
+        else:
+            return f"{before}h_row.{keyword}{after}"
+    pattern = fr"(\W?)\b({'|'.join(['cust', 'prod', 'day', 'month', 'year', 'state', 'quant', 'date'])})\b(\W?)"
+    transformed_string = re.sub(pattern, replacer, input_string, flags=re.IGNORECASE)
+
+    return transformed_string
 def having_to_condition(input_string):
     pattern = r'\b(\w+_\d+_\w+)\b'
     def replacer(match):
@@ -99,10 +117,6 @@ def main(s, n, v, f, sigma, g):
             split_key = [pair.split('-') for pair in split_key]
             for row in cur:
                 isUsed = True
-                for i in split_key:
-                    if row[i[0]] != i[1]:
-                        isUsed = False
-                        break
                 if isUsed:
                     if not(eval("{transform_condition_string(predicates[z])}")):
                         isUsed = False
