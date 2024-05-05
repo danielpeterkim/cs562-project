@@ -21,6 +21,22 @@ def get_arguments_from_file(filename):
         g = lines[4+n].strip()
     return s, n, v, f, sigma, g
 
+def process_conditions(conditions):
+    processed_conditions = []
+    for condition in conditions:
+        condition = re.sub(r'\d+\.', '', condition)  # remove numbers followed by "."
+        parts = condition.split('=')
+        if len(parts) == 2 and parts[0].strip() != parts[1].strip():
+            processed_conditions.append(condition)
+    
+    final_condition = ' OR '.join(f"({cond})" for cond in processed_conditions)
+    return final_condition
+
+def check_query_keywords(query):
+    query_lower = query.lower()
+    
+    found_keywords = [keyword for keyword in ['cust', 'prod', 'day', 'month', 'year', 'state', 'quant', 'date'] if keyword in query_lower]
+    return found_keywords
 
 def transform_condition_string(input_string):
     pattern = r"(\d+)\.([a-zA-Z_]+)"
@@ -45,7 +61,16 @@ def main(s, n, v, f, sigma, g):
     aggregate_functions = [item.strip() for item in f.split(',')]
     predicates = sigma
     having_clause = g
+    combined_input = f"{s} {v} {f} {' '.join(sigma)} {g}"
+    select_clause = ', '.join(check_query_keywords(combined_input))
+    where_clause = process_conditions(sigma) if sigma else ""
+
+    final_query = f"SELECT {select_clause} FROM sales"
+    if where_clause:
+        final_query += f" WHERE {where_clause}"
+
     body = f"""
+    
     instances = {{}}
     
     for row in cur:
@@ -127,6 +152,12 @@ def main(s, n, v, f, sigma, g):
             cur.scroll(0, mode='absolute')
     """
     
+    
+    
+    
+    
+    
+    
     groupv =""""""
     select = v + ", " + f
     aggv =""""""
@@ -152,6 +183,7 @@ def main(s, n, v, f, sigma, g):
             print(f'{{attr}}: {{value}}')
     
     """
+    
 
     # Note: The f allows formatting with variables.
     #       Also, note the indentation is preserved.
@@ -175,7 +207,7 @@ def query():
 
     conn = psycopg2.connect(host = 'localhost', dbname = dbname, user = user, password = password, port = 5432)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * FROM sales")  
+    cur.execute(f"{final_query}")  
     {body}
     {aggInstanceCode}
     table_data = [vars(inst) for inst in instances.values()]

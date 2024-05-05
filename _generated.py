@@ -49,7 +49,8 @@ def query():
 
     conn = psycopg2.connect(host = 'localhost', dbname = dbname, user = user, password = password, port = 5432)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * FROM sales")  
+    cur.execute(f"SELECT cust, prod, year, state, quant FROM sales")  
+    
     
     instances = {}
     
