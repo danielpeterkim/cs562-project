@@ -81,6 +81,7 @@ def query():
                 for i in split_key:
                     if row[i[0]] != i[1]:
                         isUsed = False
+                        break
                 if isUsed:
                     if not(eval("row['state']=='NJ' and row['year'] == 2016")):
                         isUsed = False
@@ -140,6 +141,7 @@ def query():
                 for i in split_key:
                     if row[i[0]] != i[1]:
                         isUsed = False
+                        break
                 if isUsed:
                     if not(eval("row['state']=='NY' and row['year'] == 2018")):
                         isUsed = False
@@ -188,6 +190,14 @@ def query():
                     setattr(instances[key], x, avg)
                                
             cur.scroll(0, mode='absolute')
+    
+     
+    keys_to_remove = []
+    for key, h_row in instances.items():
+        if not(eval("h_row.sum_1_quant < h_row.sum_2_quant")):
+            keys_to_remove.append(key)
+    for key in keys_to_remove:
+        del instances[key]
     
     table_data = [vars(inst) for inst in instances.values()]
     return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
