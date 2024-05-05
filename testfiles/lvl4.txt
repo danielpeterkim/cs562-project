@@ -5,5 +5,4 @@ avg_1_quant , avg_2_quant, avg_3_quant
 
 2.cust=cust and 2.state=“CT”
 3.cust=cust and 3.state=“NJ”
-avg_1_quant>avg_2_sale and avg_1_sale>avg_3_sale
-
+avg_1_quant>avg_2_quant and avg_1_quant>avg_3_quant

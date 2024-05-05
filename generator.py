@@ -27,11 +27,13 @@ def transform_condition_string(input_string):
     transformed_string = re.sub(pattern, r"row['\2']", input_string)
     return transformed_string
 
-z_prime = 0
-def increment_z_prime():
-    global z_prime
-    z_prime += 1
-
+def having_to_condition(input_string):
+    pattern = r'\b(\w+_\d+_\w+)\b'
+    def replacer(match):
+        variable = match.group(1)
+        return f"row['{variable}']"
+    having_condition = re.sub(pattern, replacer, input_string)
+    return having_condition
 def main(s, n, v, f, sigma, g):
     """
     This is the generator code. It should take in the MF structure and generate the code
