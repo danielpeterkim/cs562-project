@@ -156,11 +156,12 @@ def main(s, n, v, f, sigma, g):
     # so having will go through each "row" of instance. if it doesn't fufill predicate's logic, then delte the row. else nothing
     having = f""" 
     keys_to_remove = []
-    for key, h_row in instances.items():
-        if not(eval("{having_to_condition(having_clause)}")):
-            keys_to_remove.append(key)
-    for key in keys_to_remove:
-        del instances[key]
+    if {having_clause != ""}:
+        for key, h_row in instances.items():
+            if not(eval("{having_to_condition(having_clause)}")):
+                keys_to_remove.append(key)
+        for key in keys_to_remove:
+            del instances[key]
     """
     
     

@@ -193,11 +193,12 @@ def query():
     
      
     keys_to_remove = []
-    for key, h_row in instances.items():
-        if not(eval("h_row.sum_1_quant < h_row.sum_2_quant")):
-            keys_to_remove.append(key)
-    for key in keys_to_remove:
-        del instances[key]
+    if True:
+        for key, h_row in instances.items():
+            if not(eval("h_row.sum_1_quant < h_row.sum_2_quant")):
+                keys_to_remove.append(key)
+        for key in keys_to_remove:
+            del instances[key]
     
     table_data = [vars(inst) for inst in instances.values()]
     return tabulate.tabulate(table_data, headers="keys", tablefmt="psql")
