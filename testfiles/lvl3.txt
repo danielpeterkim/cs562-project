@@ -1,6 +1,6 @@
-cust, prod, sum_1_quant, count_1_quant, avg_1_quant
+cust, sum_1_quant, count_1_quant, avg_1_quant
 1
-cust, prod
+cust
 sum_1_quant, count_1_quant, avg_1_quant
-1.state=='NJ'
+1.state=='NJ' or 1.month > 3
 
