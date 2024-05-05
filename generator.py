@@ -125,15 +125,13 @@ def main(s, n, v, f, sigma, g):
             such_that_time_start = time.time()
             for row in cur:
                 isUsed = True
+                if not(eval(predicate_string)):
+                    isUsed = False  
                 if isUsed:
-                    such_that_time_start = time.time()
-                    if not(eval(predicate_string)):
-                        isUsed = False  
-                    if isUsed:
-                        agg_instance.append(row)  
-                    such_that_time_end = time.time()
-                    such_that_time_total =  such_that_time_end -  such_that_time_start
-                    print(f" Such That Mini Table {z} Time executed in {{such_that_time_total:.2f}} seconds.")
+                    agg_instance.append(row)  
+            such_that_time_end = time.time()
+            such_that_time_total =  such_that_time_end -  such_that_time_start
+            print(f" Such That Mini Table {z} Time executed in {{such_that_time_total:.2f}} seconds.")
             for x in {aggregate_functions}: # for calculating the aggregate functions for the H-class table
                 split_x = x.split("_")
                 if split_x[0] == "sum" and split_x[1] == str({z + 1}) :
