@@ -47,13 +47,14 @@ def transform_condition_string(input_string):
 def filter_relevant_conditions(input_string):
     def condition_filter(match):
         left, operator, right = match.group(1), match.group(2), match.group(3)
-        if left.strip().startswith("row[") and not right.strip().startswith("row["):
-            return match.group(0)  
+        if left.strip().startswith("row[") and not check_query_keywords(right.strip()):
+            return match.group(0) 
         return "" 
 
     pattern = re.compile(r"(row\['\w+'\])\s*([=!><]=?)\s*(\S+)")
     filtered_string = re.sub(pattern, condition_filter, input_string)
-
+    filtered_string = re.sub(r'^(?:\s*\b(and|or)\b\s*)+', '', filtered_string)
+    filtered_string = re.sub(r'(?:\s*\b(and|or)\b\s*)+$', '', filtered_string)
     return filtered_string
 
 def add_h_row_prefix(input_string):
@@ -131,10 +132,11 @@ def main(s, n, v, f, sigma, g):
     agg_instance = []
     for row in cur:
         isUsed = True
-        if not(eval({filter_relevant_conditions(transform_condition_string(predicates[z]))})):
+        if not(eval("{filter_relevant_conditions(transform_condition_string(predicates[z]))}")):
             isUsed = False  
         if isUsed:
             agg_instance.append(row)  
+    cur.scroll(0, mode='absolute')
     for key, h_row in instances.items():
         split_key = key.split('@')
         split_key = [pair.split('-') for pair in split_key]
@@ -142,7 +144,7 @@ def main(s, n, v, f, sigma, g):
         such_that_time_start = time.time()
         for row in agg_instance:
             isUsed = True
-            if not(eval({add_h_row_prefix(transform_condition_string(predicates[z]))})):
+            if not(eval("{add_h_row_prefix(transform_condition_string(predicates[z]))}")):
                 isUsed = False  
             if isUsed:
                 agg_instance_temp.append(row)  
