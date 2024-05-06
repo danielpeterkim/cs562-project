@@ -105,21 +105,26 @@ def main(s, n, v, f, sigma, g):
 
 
     optimizationAgg = """"""
+    aggInstanceNumbered = """"""
     for z in range(n):
+        
         optimizationAgg += f"""
         
         isUsed = True
         if not(eval("{filter_relevant_conditions(transform_condition_string(predicates[z]))}")):
             isUsed = False  
         if isUsed:
-            agg_instance.append(row)  
+            agg_instance{z}.append(row)  
+        """
+        aggInstanceNumbered += f"""
+    agg_instance{z} = []
         """
     
     
     body = f"""
     
     instances = {{}}
-    agg_instance = []
+    {aggInstanceNumbered}
     for row in cur:
         # Create a unique key
         attributesFormattedForKey = ""
@@ -154,7 +159,7 @@ def main(s, n, v, f, sigma, g):
         agg_instance_temp = []
         
         such_that_time_start = time.time()
-        for row in agg_instance:
+        for row in agg_instance{z}:
             isUsed = True
             if not(eval("{add_h_row_prefix(transform_condition_string(predicates[z]))}")):
                 isUsed = False  
@@ -171,11 +176,11 @@ def main(s, n, v, f, sigma, g):
                     sum += l[split_x[2]]
                 setattr(instances[key], x, sum)
                 
-            if split_x[0] == "count" and split_x[1] == str({z + 1}) :
+            elif split_x[0] == "count" and split_x[1] == str({z + 1}) :
                 count = len(agg_instance_temp)
                 setattr(instances[key], x, count)
 
-            if split_x[0] == "min" and split_x[1] == str({z + 1}) :
+            elif split_x[0] == "min" and split_x[1] == str({z + 1}) :
                 first = True
                 for l in agg_instance_temp:
                     if first:
@@ -186,7 +191,7 @@ def main(s, n, v, f, sigma, g):
                             min = l[split_x[2]]
                 setattr(instances[key], x, min)
 
-            if split_x[0] == "max" and split_x[1] == str({z + 1}) :
+            elif split_x[0] == "max" and split_x[1] == str({z + 1}) :
                 first = True
                 for l in agg_instance_temp:
                     if first:
