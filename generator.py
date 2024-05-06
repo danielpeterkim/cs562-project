@@ -156,24 +156,28 @@ def main(s, n, v, f, sigma, g):
     for key, h_row in instances.items():
         split_key = key.split('@')
         split_key = [pair.split('-') for pair in split_key]
-        agg_instance_temp = []
-        
+
+        max_size = 10000    #Preallocating the space for the list
+        agg_instance_temp = [None] * max_size
+        curr_size = 0
+
         such_that_time_start = time.time()
         for row in agg_instance{z}:
             isUsed = True
             if not(eval("{add_h_row_prefix(transform_condition_string(predicates[z]))}")):
                 isUsed = False  
             if isUsed:
-                agg_instance_temp.append(row)  
+                agg_instance_temp[curr_size] = row
+                curr_size +=1  
         such_that_time_end = time.time()
         such_that_time_total =  such_that_time_end -  such_that_time_start
         print(f" Such That Mini Table {z} Time executed in {{such_that_time_total:.2f}} seconds.")
         for x in {aggregate_functions}: # for calculating the aggregate functions for the H-class table
             split_x = x.split("_")
-            if split_x[0] == "sum" and split_x[1] == str({z + 1}) :
+            if split_x[0] == "sum" and split_x[1] == str({z + 1}):
                 sum = 0
-                for l in agg_instance_temp: 
-                    sum += l[split_x[2]]
+                for l in range(curr_size): 
+                    sum += agg_instance_temp[l][split_x[2]]
                 setattr(instances[key], x, sum)
                 
             elif split_x[0] == "count" and split_x[1] == str({z + 1}) :
@@ -182,31 +186,31 @@ def main(s, n, v, f, sigma, g):
 
             elif split_x[0] == "min" and split_x[1] == str({z + 1}) :
                 first = True
-                for l in agg_instance_temp:
+                for l in range(curr_size):
                     if first:
-                        min = l[split_x[2]]
+                        min = agg_instance_temp[l][split_x[2]]
                         first = False
                     else:
-                        if l[split_x[2]] < min:
-                            min = l[split_x[2]]
+                        if agg_instance_temp[l][split_x[2]] < min:
+                            min = agg_instance_temp[l][split_x[2]]
                 setattr(instances[key], x, min)
 
             elif split_x[0] == "max" and split_x[1] == str({z + 1}) :
                 first = True
-                for l in agg_instance_temp:
+                for l in range(curr_size):
                     if first:
-                        max = l[split_x[2]]
+                        max = agg_instance_temp[l][split_x[2]]
                         first = False
                     else:
-                        if (l[split_x[2]] > max):
-                            max = l[split_x[2]]
+                        if (agg_instance_temp[l][split_x[2]] > max):
+                            max = agg_instance_temp[l][split_x[2]]
                 setattr(instances[key], x, max)
             
             if split_x[0] == "avg" and split_x[1] == str({z + 1}) :
                 sum = 0
                 count = len(agg_instance_temp)
-                for l in agg_instance_temp: 
-                    sum += l[split_x[2]]
+                for l in range(curr_size): 
+                    sum += agg_instance_temp[l][split_x[2]]
                 avg = sum/count
                 setattr(instances[key], x, avg)
                             
