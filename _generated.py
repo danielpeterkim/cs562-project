@@ -71,132 +71,140 @@ def query():
     print(f"H Table Grouping Atrr executed in {h_table_grouping_attr_time_total:.2f} seconds.")
     
     
-    predicate_string = "row['cust'] == h_row.cust and row['prod'] == h_row.prod and row['state']=='NJ' and row['year'] == 2016"
     h_table_aggrefunc_time_start = time.time()
-
+    agg_instance = []
+    for row in cur:
+        isUsed = True
+        if not(eval(row['cust'] == cust and row['prod'] == prod and row['state']=='NJ' and row['year'] < year)):
+            isUsed = False  
+        if isUsed:
+            agg_instance.append(row)  
     for key, h_row in instances.items():
-            agg_instance = []
-            split_key = key.split('@')
-            split_key = [pair.split('-') for pair in split_key]
-            such_that_time_start = time.time()
-            for row in cur:
-                isUsed = True
-                such_that_time_start = time.time()
-                if not(eval(predicate_string)):
-                    isUsed = False  
-                if isUsed:
-                    agg_instance.append(row)  
-            such_that_time_end = time.time()
-            such_that_time_total =  such_that_time_end -  such_that_time_start
-            print(f" Such That Mini Table 0 Time executed in {such_that_time_total:.2f} seconds.")
-            for x in ['sum_1_quant', 'count_1_quant', 'min_1_quant', 'max_1_quant', 'sum_2_quant']: # for calculating the aggregate functions for the H-class table
-                split_x = x.split("_")
-                if split_x[0] == "sum" and split_x[1] == str(1) :
-                    sum = 0
-                    for l in agg_instance: 
-                        sum += l[split_x[2]]
-                    setattr(instances[key], x, sum)
-                    
-                if split_x[0] == "count" and split_x[1] == str(1) :
-                    count = len(agg_instance)
-                    setattr(instances[key], x, count)
-
-                if split_x[0] == "min" and split_x[1] == str(1) :
-                    first = True
-                    for l in agg_instance:
-                        if first:
-                            min = l[split_x[2]]
-                            first = False
-                        else:
-                            if l[split_x[2]] < min:
-                                min = l[split_x[2]]
-                    setattr(instances[key], x, min)
-
-                if split_x[0] == "max" and split_x[1] == str(1) :
-                    first = True
-                    for l in agg_instance:
-                        if first:
-                            max = l[split_x[2]]
-                            first = False
-                        else:
-                            if (l[split_x[2]] > max):
-                                max = l[split_x[2]]
-                    setattr(instances[key], x, max)
+        split_key = key.split('@')
+        split_key = [pair.split('-') for pair in split_key]
+        agg_instance_temp = []
+        such_that_time_start = time.time()
+        for row in agg_instance:
+            isUsed = True
+            if not(eval(row['cust'] == h_row.cust and row['prod'] == h_row.prod and row['state']=='NJ' and row['year'] < h_row.year)):
+                isUsed = False  
+            if isUsed:
+                agg_instance_temp.append(row)  
+        such_that_time_end = time.time()
+        such_that_time_total =  such_that_time_end -  such_that_time_start
+        print(f" Such That Mini Table 0 Time executed in {such_that_time_total:.2f} seconds.")
+        for x in ['sum_1_quant', 'count_1_quant', 'min_1_quant', 'max_1_quant', 'sum_2_quant']: # for calculating the aggregate functions for the H-class table
+            split_x = x.split("_")
+            if split_x[0] == "sum" and split_x[1] == str(1) :
+                sum = 0
+                for l in agg_instance_temp: 
+                    sum += l[split_x[2]]
+                setattr(instances[key], x, sum)
                 
-                if split_x[0] == "avg" and split_x[1] == str(1) :
-                    sum = 0
-                    count = len(agg_instance)
-                    for l in agg_instance: 
-                        sum += l[split_x[2]]
-                    avg = sum/count
-                    setattr(instances[key], x, avg)
-                               
-            cur.scroll(0, mode='absolute')
+            if split_x[0] == "count" and split_x[1] == str(1) :
+                count = len(agg_instance_temp)
+                setattr(instances[key], x, count)
+
+            if split_x[0] == "min" and split_x[1] == str(1) :
+                first = True
+                for l in agg_instance_temp:
+                    if first:
+                        min = l[split_x[2]]
+                        first = False
+                    else:
+                        if l[split_x[2]] < min:
+                            min = l[split_x[2]]
+                setattr(instances[key], x, min)
+
+            if split_x[0] == "max" and split_x[1] == str(1) :
+                first = True
+                for l in agg_instance_temp:
+                    if first:
+                        max = l[split_x[2]]
+                        first = False
+                    else:
+                        if (l[split_x[2]] > max):
+                            max = l[split_x[2]]
+                setattr(instances[key], x, max)
+            
+            if split_x[0] == "avg" and split_x[1] == str(1) :
+                sum = 0
+                count = len(agg_instance_temp)
+                for l in agg_instance_temp: 
+                    sum += l[split_x[2]]
+                avg = sum/count
+                setattr(instances[key], x, avg)
+                            
+        cur.scroll(0, mode='absolute')
     h_table_aggrefunc_time_end = time.time()
     h_table_aggrefunc_time_total = h_table_aggrefunc_time_end - h_table_aggrefunc_time_start
     print(f" H Table AggreFunc 0 Time executed in {h_table_aggrefunc_time_total:.2f} seconds.")
     
-    predicate_string = "row['cust'] == h_row.cust and row['prod'] == h_row.prod and row['state']=='NY' and row['year'] == 2018"
     h_table_aggrefunc_time_start = time.time()
-
+    agg_instance = []
+    for row in cur:
+        isUsed = True
+        if not(eval(row['cust'] == cust and row['prod'] == prod and row['state']=='NY' and row['year'] < year)):
+            isUsed = False  
+        if isUsed:
+            agg_instance.append(row)  
     for key, h_row in instances.items():
-            agg_instance = []
-            split_key = key.split('@')
-            split_key = [pair.split('-') for pair in split_key]
-            such_that_time_start = time.time()
-            for row in cur:
-                isUsed = True
-                such_that_time_start = time.time()
-                if not(eval(predicate_string)):
-                    isUsed = False  
-                if isUsed:
-                    agg_instance.append(row)  
-            such_that_time_end = time.time()
-            such_that_time_total =  such_that_time_end -  such_that_time_start
-            print(f" Such That Mini Table 1 Time executed in {such_that_time_total:.2f} seconds.")
-            for x in ['sum_1_quant', 'count_1_quant', 'min_1_quant', 'max_1_quant', 'sum_2_quant']: # for calculating the aggregate functions for the H-class table
-                split_x = x.split("_")
-                if split_x[0] == "sum" and split_x[1] == str(2) :
-                    sum = 0
-                    for l in agg_instance: 
-                        sum += l[split_x[2]]
-                    setattr(instances[key], x, sum)
-                    
-                if split_x[0] == "count" and split_x[1] == str(2) :
-                    count = len(agg_instance)
-                    setattr(instances[key], x, count)
-
-                if split_x[0] == "min" and split_x[1] == str(2) :
-                    first = True
-                    for l in agg_instance:
-                        if first:
-                            min = l[split_x[2]]
-                            first = False
-                        else:
-                            if l[split_x[2]] < min:
-                                min = l[split_x[2]]
-                    setattr(instances[key], x, min)
-
-                if split_x[0] == "max" and split_x[1] == str(2) :
-                    first = True
-                    for l in agg_instance:
-                        if first:
-                            max = l[split_x[2]]
-                            first = False
-                        else:
-                            if (l[split_x[2]] > max):
-                                max = l[split_x[2]]
-                    setattr(instances[key], x, max)
+        split_key = key.split('@')
+        split_key = [pair.split('-') for pair in split_key]
+        agg_instance_temp = []
+        such_that_time_start = time.time()
+        for row in agg_instance:
+            isUsed = True
+            if not(eval(row['cust'] == h_row.cust and row['prod'] == h_row.prod and row['state']=='NY' and row['year'] < h_row.year)):
+                isUsed = False  
+            if isUsed:
+                agg_instance_temp.append(row)  
+        such_that_time_end = time.time()
+        such_that_time_total =  such_that_time_end -  such_that_time_start
+        print(f" Such That Mini Table 1 Time executed in {such_that_time_total:.2f} seconds.")
+        for x in ['sum_1_quant', 'count_1_quant', 'min_1_quant', 'max_1_quant', 'sum_2_quant']: # for calculating the aggregate functions for the H-class table
+            split_x = x.split("_")
+            if split_x[0] == "sum" and split_x[1] == str(2) :
+                sum = 0
+                for l in agg_instance_temp: 
+                    sum += l[split_x[2]]
+                setattr(instances[key], x, sum)
                 
-                if split_x[0] == "avg" and split_x[1] == str(2) :
-                    sum = 0
-                    count = len(agg_instance)
-                    for l in agg_instance: 
-                        sum += l[split_x[2]]
-                    avg = sum/count
-                    setattr(instances[key], x, avg)
-                               
-            cur.scroll(0, mode='absolute')
+            if split_x[0] == "count" and split_x[1] == str(2) :
+                count = len(agg_instance_temp)
+                setattr(instances[key], x, count)
+
+            if split_x[0] == "min" and split_x[1] == str(2) :
+                first = True
+                for l in agg_instance_temp:
+                    if first:
+                        min = l[split_x[2]]
+                        first = False
+                    else:
+                        if l[split_x[2]] < min:
+                            min = l[split_x[2]]
+                setattr(instances[key], x, min)
+
+            if split_x[0] == "max" and split_x[1] == str(2) :
+                first = True
+                for l in agg_instance_temp:
+                    if first:
+                        max = l[split_x[2]]
+                        first = False
+                    else:
+                        if (l[split_x[2]] > max):
+                            max = l[split_x[2]]
+                setattr(instances[key], x, max)
+            
+            if split_x[0] == "avg" and split_x[1] == str(2) :
+                sum = 0
+                count = len(agg_instance_temp)
+                for l in agg_instance_temp: 
+                    sum += l[split_x[2]]
+                avg = sum/count
+                setattr(instances[key], x, avg)
+                            
+        cur.scroll(0, mode='absolute')
     h_table_aggrefunc_time_end = time.time()
     h_table_aggrefunc_time_total = h_table_aggrefunc_time_end - h_table_aggrefunc_time_start
     print(f" H Table AggreFunc 1 Time executed in {h_table_aggrefunc_time_total:.2f} seconds.")

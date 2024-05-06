@@ -42,7 +42,19 @@ def check_query_keywords(query):
 def transform_condition_string(input_string):
     pattern = r"(\d+)\.([a-zA-Z_]+)"
     transformed_string = re.sub(pattern, r"row['\2']", input_string)
-    return add_h_row_prefix(transformed_string)
+    return transformed_string
+
+def filter_relevant_conditions(input_string):
+    def condition_filter(match):
+        left, operator, right = match.group(1), match.group(2), match.group(3)
+        if left.strip().startswith("row[") and not right.strip().startswith("row["):
+            return match.group(0)  
+        return "" 
+
+    pattern = re.compile(r"(row\['\w+'\])\s*([=!><]=?)\s*(\S+)")
+    filtered_string = re.sub(pattern, condition_filter, input_string)
+
+    return filtered_string
 
 def add_h_row_prefix(input_string):
     keywords = ['cust', 'prod', 'day', 'month', 'year', 'state', 'quant', 'date']
@@ -115,66 +127,71 @@ def main(s, n, v, f, sigma, g):
     aggInstanceCode = """"""
     for z in range(n):
         aggInstanceCode += f"""
-    predicate_string = "{transform_condition_string(predicates[z])}"
     h_table_aggrefunc_time_start = time.time()
-
+    agg_instance = []
+    for row in cur:
+        isUsed = True
+        if not(eval({filter_relevant_conditions(transform_condition_string(predicates[z]))})):
+            isUsed = False  
+        if isUsed:
+            agg_instance.append(row)  
     for key, h_row in instances.items():
-            agg_instance = []
-            split_key = key.split('@')
-            split_key = [pair.split('-') for pair in split_key]
-            such_that_time_start = time.time()
-            for row in cur:
-                isUsed = True
-                if not(eval(predicate_string)):
-                    isUsed = False  
-                if isUsed:
-                    agg_instance.append(row)  
-            such_that_time_end = time.time()
-            such_that_time_total =  such_that_time_end -  such_that_time_start
-            print(f" Such That Mini Table {z} Time executed in {{such_that_time_total:.2f}} seconds.")
-            for x in {aggregate_functions}: # for calculating the aggregate functions for the H-class table
-                split_x = x.split("_")
-                if split_x[0] == "sum" and split_x[1] == str({z + 1}) :
-                    sum = 0
-                    for l in agg_instance: 
-                        sum += l[split_x[2]]
-                    setattr(instances[key], x, sum)
-                    
-                if split_x[0] == "count" and split_x[1] == str({z + 1}) :
-                    count = len(agg_instance)
-                    setattr(instances[key], x, count)
-
-                if split_x[0] == "min" and split_x[1] == str({z + 1}) :
-                    first = True
-                    for l in agg_instance:
-                        if first:
-                            min = l[split_x[2]]
-                            first = False
-                        else:
-                            if l[split_x[2]] < min:
-                                min = l[split_x[2]]
-                    setattr(instances[key], x, min)
-
-                if split_x[0] == "max" and split_x[1] == str({z + 1}) :
-                    first = True
-                    for l in agg_instance:
-                        if first:
-                            max = l[split_x[2]]
-                            first = False
-                        else:
-                            if (l[split_x[2]] > max):
-                                max = l[split_x[2]]
-                    setattr(instances[key], x, max)
+        split_key = key.split('@')
+        split_key = [pair.split('-') for pair in split_key]
+        agg_instance_temp = []
+        such_that_time_start = time.time()
+        for row in agg_instance:
+            isUsed = True
+            if not(eval({add_h_row_prefix(transform_condition_string(predicates[z]))})):
+                isUsed = False  
+            if isUsed:
+                agg_instance_temp.append(row)  
+        such_that_time_end = time.time()
+        such_that_time_total =  such_that_time_end -  such_that_time_start
+        print(f" Such That Mini Table {z} Time executed in {{such_that_time_total:.2f}} seconds.")
+        for x in {aggregate_functions}: # for calculating the aggregate functions for the H-class table
+            split_x = x.split("_")
+            if split_x[0] == "sum" and split_x[1] == str({z + 1}) :
+                sum = 0
+                for l in agg_instance_temp: 
+                    sum += l[split_x[2]]
+                setattr(instances[key], x, sum)
                 
-                if split_x[0] == "avg" and split_x[1] == str({z + 1}) :
-                    sum = 0
-                    count = len(agg_instance)
-                    for l in agg_instance: 
-                        sum += l[split_x[2]]
-                    avg = sum/count
-                    setattr(instances[key], x, avg)
-                               
-            cur.scroll(0, mode='absolute')
+            if split_x[0] == "count" and split_x[1] == str({z + 1}) :
+                count = len(agg_instance_temp)
+                setattr(instances[key], x, count)
+
+            if split_x[0] == "min" and split_x[1] == str({z + 1}) :
+                first = True
+                for l in agg_instance_temp:
+                    if first:
+                        min = l[split_x[2]]
+                        first = False
+                    else:
+                        if l[split_x[2]] < min:
+                            min = l[split_x[2]]
+                setattr(instances[key], x, min)
+
+            if split_x[0] == "max" and split_x[1] == str({z + 1}) :
+                first = True
+                for l in agg_instance_temp:
+                    if first:
+                        max = l[split_x[2]]
+                        first = False
+                    else:
+                        if (l[split_x[2]] > max):
+                            max = l[split_x[2]]
+                setattr(instances[key], x, max)
+            
+            if split_x[0] == "avg" and split_x[1] == str({z + 1}) :
+                sum = 0
+                count = len(agg_instance_temp)
+                for l in agg_instance_temp: 
+                    sum += l[split_x[2]]
+                avg = sum/count
+                setattr(instances[key], x, avg)
+                            
+        cur.scroll(0, mode='absolute')
     h_table_aggrefunc_time_end = time.time()
     h_table_aggrefunc_time_total = h_table_aggrefunc_time_end - h_table_aggrefunc_time_start
     print(f" H Table AggreFunc {z} Time executed in {{h_table_aggrefunc_time_total:.2f}} seconds.")
