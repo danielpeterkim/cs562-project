@@ -102,10 +102,24 @@ def main(s, n, v, f, sigma, g):
     if where_clause:
         final_query += f" WHERE {where_clause}"
 
+
+
+    optimizationAgg = """"""
+    for z in range(n):
+        optimizationAgg += f"""
+        
+        isUsed = True
+        if not(eval("{filter_relevant_conditions(transform_condition_string(predicates[z]))}")):
+            isUsed = False  
+        if isUsed:
+            agg_instance.append(row)  
+        """
+    
+    
     body = f"""
     
     instances = {{}}
-    
+    agg_instance = []
     for row in cur:
         # Create a unique key
         attributesFormattedForKey = ""
@@ -120,27 +134,25 @@ def main(s, n, v, f, sigma, g):
         key = attributesFormattedForKey
         if key not in instances:
             instances[key] = H(**hInstan)
+        
+        {optimizationAgg}
     cur.scroll(0, mode='absolute')
     h_table_grouping_attr_time = time.time()
     h_table_grouping_attr_time_total = h_table_grouping_attr_time - start_time
     print(f"H Table Grouping Atrr executed in {{h_table_grouping_attr_time_total:.2f}} seconds.")
     """
+    
+
+    
     aggInstanceCode = """"""
     for z in range(n):
         aggInstanceCode += f"""
     h_table_aggrefunc_time_start = time.time()
-    agg_instance = []
-    for row in cur:
-        isUsed = True
-        if not(eval("{filter_relevant_conditions(transform_condition_string(predicates[z]))}")):
-            isUsed = False  
-        if isUsed:
-            agg_instance.append(row)  
-    cur.scroll(0, mode='absolute')
     for key, h_row in instances.items():
         split_key = key.split('@')
         split_key = [pair.split('-') for pair in split_key]
         agg_instance_temp = []
+        
         such_that_time_start = time.time()
         for row in agg_instance:
             isUsed = True

@@ -50,7 +50,7 @@ def query():
     
     
     instances = {}
-    
+    agg_instance = []
     for row in cur:
         # Create a unique key
         attributesFormattedForKey = ""
@@ -65,6 +65,22 @@ def query():
         key = attributesFormattedForKey
         if key not in instances:
             instances[key] = H(**hInstan)
+        
+        
+        
+        isUsed = True
+        if not(eval("row['state']=='NJ' and row['year'] == 2018")):
+            isUsed = False  
+        if isUsed:
+            agg_instance.append(row)  
+        
+        
+        isUsed = True
+        if not(eval("row['state']=='NY' and row['year'] == 2019")):
+            isUsed = False  
+        if isUsed:
+            agg_instance.append(row)  
+        
     cur.scroll(0, mode='absolute')
     h_table_grouping_attr_time = time.time()
     h_table_grouping_attr_time_total = h_table_grouping_attr_time - start_time
@@ -72,14 +88,6 @@ def query():
     
     
     h_table_aggrefunc_time_start = time.time()
-    agg_instance = []
-    for row in cur:
-        isUsed = True
-        if not(eval("row['state']=='NJ'")):
-            isUsed = False  
-        if isUsed:
-            agg_instance.append(row)  
-    cur.scroll(0, mode='absolute')
     for key, h_row in instances.items():
         split_key = key.split('@')
         split_key = [pair.split('-') for pair in split_key]
@@ -87,7 +95,7 @@ def query():
         such_that_time_start = time.time()
         for row in agg_instance:
             isUsed = True
-            if not(eval("row['cust'] == h_row.cust and row['prod'] == h_row.prod and row['state']=='NJ' and row['year'] < h_row.year")):
+            if not(eval("row['cust'] == h_row.cust and row['prod'] == h_row.prod and row['state']=='NJ' and row['year'] == 2018")):
                 isUsed = False  
             if isUsed:
                 agg_instance_temp.append(row)  
@@ -142,14 +150,6 @@ def query():
     print(f" H Table AggreFunc 0 Time executed in {h_table_aggrefunc_time_total:.2f} seconds.")
     
     h_table_aggrefunc_time_start = time.time()
-    agg_instance = []
-    for row in cur:
-        isUsed = True
-        if not(eval("row['state']=='NY'")):
-            isUsed = False  
-        if isUsed:
-            agg_instance.append(row)  
-    cur.scroll(0, mode='absolute')
     for key, h_row in instances.items():
         split_key = key.split('@')
         split_key = [pair.split('-') for pair in split_key]
@@ -157,7 +157,7 @@ def query():
         such_that_time_start = time.time()
         for row in agg_instance:
             isUsed = True
-            if not(eval("row['cust'] == h_row.cust and row['prod'] == h_row.prod and row['state']=='NY' and row['year'] < h_row.year")):
+            if not(eval("row['cust'] == h_row.cust and row['prod'] == h_row.prod and row['state']=='NY' and row['year'] == 2019")):
                 isUsed = False  
             if isUsed:
                 agg_instance_temp.append(row)  
