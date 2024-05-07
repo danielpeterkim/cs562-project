@@ -1,7 +1,7 @@
 SQL:
-SELECT cust, prod, avg(quant), max(quant)
-FROM sales
-GROUP BY cust,prod
+select sales.cust, sales.prod, avg(quant), max(quant)
+from sales
+group by sales.cust, sales.prod
 
 EMF:
 SELECT cust, prod, avg(quant), max(quant)
