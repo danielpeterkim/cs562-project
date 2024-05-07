@@ -1,6 +1,6 @@
-cust, sum(1.quant), avg(1.quant), max(1.quant), min(1.quant), count(1.quant)
+cust, sum_1_quant, avg_1_quant_, max_1_quant, min_1_quant, count_1_quant
 1
-sales
-sum(1.quant), avg(1.quant), max(1.quant), min(1.quant), count(1.quant)
-1.state = 'NY' and 1.cust 
+cust
+sum_1_quant, avg_1_quant_, max_1_quant, min_1_quant, count_1_quant
+1.state == 'NY' and 1.cust == cust 
 

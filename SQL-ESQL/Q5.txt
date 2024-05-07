@@ -19,4 +19,4 @@ FROM sales
 GROUP BY prod, year; 1, 2
 SUCH THAT 1.prod = prod AND 1.year = year,
           2.prod = prod
-HAVING sum(1.quant) > 2 * sum(2.quant) OR avg(1.quant) > avg(3.quant)
+HAVING sum(1.quant) > 2 * avg(2.quant)

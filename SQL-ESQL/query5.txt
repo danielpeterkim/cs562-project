@@ -1,8 +1,8 @@
-prod, year, sum(1.quant), avg(2.quant)
+prod, year, sum_1_quant, avg_2_quant
 2
 prod, year
-sum(1.quant), avg(2.quant)
-1.prod = prod and 1.year = year
-2.prod = prod
-sum(1.quant) > 2 * sum(2.quant) or avg(1.quant) > avg(3.quant)\
+sum_1_quant, avg_2_quant
+1.prod == prod and 1.year == year
+2.prod == prod
+sum_1_quant > 2 * sum_2_quant or avg_1_quant > avg_3_quant
 
