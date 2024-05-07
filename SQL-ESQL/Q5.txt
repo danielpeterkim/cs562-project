@@ -1,0 +1,22 @@
+SQL:
+CREATE VIEW Q1 as
+    SELECT prod, year, Q1sum = sum(quant)
+    FROM sales
+    GROUP BY prod, year
+CREATE VIEW Q2 as
+    SELECT prod, Q2avg = avg(quant)
+    FROM sales
+    GROUP BY prod
+
+SELECT prod, year, Q1.sum, Q2.avg
+FROM Q1, Q2
+GROUP BY prod
+HAVING Q1.sum > 0.25 * avg(2.quant)
+
+EMF:
+SELECT prod, year, sum(1.quant), avg(2.quant)
+FROM sales
+GROUP BY prod, year; 1, 2
+SUCH THAT 1.prod = prod AND 1.year = year,
+          2.prod = prod
+HAVING sum(1.quant) > 2 * sum(2.quant) OR avg(1.quant) > avg(3.quant)

@@ -1,0 +1,30 @@
+SQL:
+CREATE VIEW Q1 as
+    SELECT cust, Q1sum = sum(quant), Q1avg = avg(quant)
+    FROM sales
+    WHERE state = 'NY'
+    GROUP BY cust
+CREATE VIEW Q2 as
+    SELECT cust, Q2sum = sum(quant), Q2avg = avg(quant)
+    FROM sales
+    WHERE state = 'NJ'
+    GROUP BY cust
+CREATE VIEW Q3 as
+    SELECT cust, Q3sum = sum(quant), Q3avg = avg(quant)
+    FROM sales
+    WHERE state = 'CT'
+    GROUP BY cust
+
+SELECT cust, Q1.sum, Q1.avg, Q2.sum, Q2.avg, Q3.sum, Q3.avg
+FROM Q1, Q2, Q3
+GROUP BY cust
+HAVING Q1.sum > 2 * Q2.sum OR Q1.avg > Q3.avg
+
+EMF:
+SELECT cust, sum(1.quant), avg(1.quant), sum(2.quant), avg(2.quant), sum(3.quant), avg(3.quant)
+FROM sales
+GROUP BY cust; 1, 2, 3
+SUCH THAT 1.state = 'NY' AND 1.cust = cust,
+          2.state = 'NJ' AND 2.cust = cust,
+          3.state = 'CT' AND 3.cust = cust
+HAVING sum(1.quant) > 2 * sum(2.quant) OR avg(1.quant) > avg(3.quant)
