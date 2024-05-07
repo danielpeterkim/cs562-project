@@ -4,5 +4,5 @@ prod, year
 sum_1_quant, avg_2_quant
 1.prod == prod and 1.year == year
 2.prod == prod
-sum_1_quant > 2 * sum_2_quant or avg_1_quant > avg_3_quant
+sum_1_quant > 2 * avg_2_quant
 
