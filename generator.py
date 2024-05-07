@@ -211,7 +211,10 @@ def main(s, n, v, f, sigma, g):
                 sum = 0
                 for l in range(curr_size): 
                     sum += agg_instance_temp[l][split_x[2]]
-                avg = sum/curr_size
+                if curr_size != 0:
+                    avg = sum/curr_size
+                else:
+                    avg = 0
                 setattr(instances[key], x, avg)
                             
         cur.scroll(0, mode='absolute')
