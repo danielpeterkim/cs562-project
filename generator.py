@@ -105,16 +105,21 @@ def main(s, n, v, f, sigma, g):
 
 
     optimizationAgg = """"""
+    
     aggInstanceNumbered = """"""
     for z in range(n):
-        
-        optimizationAgg += f"""
-        
+        eval_string_h = f"{filter_relevant_conditions(transform_condition_string(predicates[z]))}"
+        if eval_string_h:
+            optimizationAgg += f"""
         isUsed = True
-        if not(eval("{filter_relevant_conditions(transform_condition_string(predicates[z]))}")):
+        if not(eval("{eval_string_h}")):
             isUsed = False  
         if isUsed:
             agg_instance{z}.append(row)  
+        """
+        else:
+            optimizationAgg += f"""
+        agg_instance{z}.append(row)  
         """
         aggInstanceNumbered += f"""
     agg_instance{z} = []
@@ -141,6 +146,7 @@ def main(s, n, v, f, sigma, g):
             instances[key] = H(**hInstan)
         
         {optimizationAgg}
+    
     cur.scroll(0, mode='absolute')
     h_table_grouping_attr_time = time.time()
     h_table_grouping_attr_time_total = h_table_grouping_attr_time - start_time
@@ -152,23 +158,19 @@ def main(s, n, v, f, sigma, g):
     aggInstanceCode = """"""
     for z in range(n):
         aggInstanceCode += f"""
+    eval_string = "{add_h_row_prefix(transform_condition_string(predicates[z]))}"
     h_table_aggrefunc_time_start = time.time()
     for key, h_row in instances.items():
         split_key = key.split('@')
         split_key = [pair.split('-') for pair in split_key]
-
-        max_size = 10000    #Preallocating the space for the list
         agg_instance_temp = [None] * max_size
         curr_size = 0
 
         such_that_time_start = time.time()
         for row in agg_instance{z}:
-            isUsed = True
-            if not(eval("{add_h_row_prefix(transform_condition_string(predicates[z]))}")):
-                isUsed = False  
-            if isUsed:
+            if eval(eval_string):
                 agg_instance_temp[curr_size] = row
-                curr_size +=1  
+                curr_size += 1  
         such_that_time_end = time.time()
         such_that_time_total =  such_that_time_end -  such_that_time_start
         print(f" Such That Mini Table {z} Time executed in {{such_that_time_total:.2f}} seconds.")
@@ -181,8 +183,7 @@ def main(s, n, v, f, sigma, g):
                 setattr(instances[key], x, sum)
                 
             elif split_x[0] == "count" and split_x[1] == str({z + 1}) :
-                count = len(agg_instance_temp)
-                setattr(instances[key], x, count)
+                setattr(instances[key], x, curr_size)
 
             elif split_x[0] == "min" and split_x[1] == str({z + 1}) :
                 first = True
@@ -208,10 +209,9 @@ def main(s, n, v, f, sigma, g):
             
             if split_x[0] == "avg" and split_x[1] == str({z + 1}) :
                 sum = 0
-                count = len(agg_instance_temp)
                 for l in range(curr_size): 
                     sum += agg_instance_temp[l][split_x[2]]
-                avg = sum/count
+                avg = sum/curr_size
                 setattr(instances[key], x, avg)
                             
         cur.scroll(0, mode='absolute')
@@ -287,6 +287,9 @@ def query():
     start_time = time.time()
     cur.execute(f"{final_query}")  
     {body}
+    
+    max_size = 10000    #Preallocating the space for the list
+
     {aggInstanceCode}
     
     {having}

@@ -1,6 +1,6 @@
-cust, sum_1_quant, count_1_quant, avg_1_quant
+cust, month, sum_1_quant, avg_1_quant
 1
-cust
-sum_1_quant, count_1_quant, avg_1_quant
-1.state=='NJ' or 1.month > 3
+cust, month
+sum_1_quant, avg_1_quant
+1.cust == cust and 1.state=='NJ'
 

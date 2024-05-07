@@ -5,3 +5,4 @@ sum_1_quant, sum_2_quant
 1.cust == cust and 1.state=='NJ'
 2.cust == cust and 2.state=='NY'
 
+
