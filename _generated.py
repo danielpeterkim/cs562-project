@@ -10,10 +10,13 @@ from dotenv import load_dotenv
 
 class H:
 
-    def __init__(mysillyobject, cust, avg_1_quant , avg_2_quant, avg_3_quant):
+    def __init__(mysillyobject, prod,month, avg_1_quant, avg_2_quant, avg_3_quant):
         
         
-        mysillyobject.cust = cust
+        mysillyobject.prod = prod
+        
+        
+        mysillyobject.month = month
         
         
 
@@ -37,7 +40,7 @@ def query():
     conn = psycopg2.connect(host = 'localhost', dbname = dbname, user = user, password = password, port = 5432)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     start_time = time.time()
-    cur.execute(f"SELECT cust, state, quant FROM sales")  
+    cur.execute(f"SELECT prod, month, state, quant FROM sales")  
     
     
     instances = {}
@@ -52,7 +55,7 @@ def query():
         # Create a unique key
         attributesFormattedForKey = ""
         hInstan = {}
-        for x in ['cust']:
+        for x in ['prod', 'month']:
             attributesFormattedForKey += f"{x}-{row[x]}@"
             hInstan[x] = row[x]
         attributesFormattedForKey = attributesFormattedForKey[:-1]
@@ -65,19 +68,19 @@ def query():
         
         
         isUsed = True
-        if not(eval("row['state']=='NY'")):
+        if not(eval("row['state'] == 'NJ'")):
             isUsed = False  
         if isUsed:
             agg_instance0.append(row)  
         
         isUsed = True
-        if not(eval("row['state']=='CT'")):
+        if not(eval("row['state'] == 'NJ'")):
             isUsed = False  
         if isUsed:
             agg_instance1.append(row)  
         
         isUsed = True
-        if not(eval("row['state']=='NJ'")):
+        if not(eval("row['state'] == 'NJ'")):
             isUsed = False  
         if isUsed:
             agg_instance2.append(row)  
@@ -92,7 +95,7 @@ def query():
     max_size = 10000    #Preallocating the space for the list
 
     
-    eval_string = "row['cust']==h_row.cust and row['state']=='NY'"
+    eval_string = "row['prod'] == h_row.prod and row['month'] == h_row.month-1 and row['state'] == 'NJ'"
     h_table_aggrefunc_time_start = time.time()
     for key, h_row in instances.items():
         split_key = key.split('@')
@@ -156,7 +159,7 @@ def query():
     h_table_aggrefunc_time_total = h_table_aggrefunc_time_end - h_table_aggrefunc_time_start
     print(f" H Table AggreFunc 0 Time executed in {h_table_aggrefunc_time_total:.2f} seconds.")
     
-    eval_string = "row['cust']==h_row.cust and row['state']=='CT'"
+    eval_string = "row['prod'] == h_row.prod and row['month'] == h_row.month+1 and row['state'] == 'NJ'"
     h_table_aggrefunc_time_start = time.time()
     for key, h_row in instances.items():
         split_key = key.split('@')
@@ -220,7 +223,7 @@ def query():
     h_table_aggrefunc_time_total = h_table_aggrefunc_time_end - h_table_aggrefunc_time_start
     print(f" H Table AggreFunc 1 Time executed in {h_table_aggrefunc_time_total:.2f} seconds.")
     
-    eval_string = "row['cust']==h_row.cust and row['state']=='NJ'"
+    eval_string = "row['prod'] == h_row.prod and row['month'] == h_row.month and row['state'] == 'NJ'"
     h_table_aggrefunc_time_start = time.time()
     for key, h_row in instances.items():
         split_key = key.split('@')
@@ -287,17 +290,13 @@ def query():
     
      
     keys_to_remove = []
-    if True:
-        having_time_start = time.time()
-        having_string = "h_row.avg_1_quant>h_row.avg_2_quant and h_row.avg_1_quant>h_row.avg_3_quant"
+    if False:
+        having_string = ""
         for key, h_row in instances.items():
             if not(eval(having_string)):
                 keys_to_remove.append(key)
         for key in keys_to_remove:
             del instances[key]
-        having_time_end = time.time()
-        having_time_total = having_time_end - having_time_start
-        print(f" Having Time executed in {having_time_total:.2f} seconds.")
     
     end_time = time.time()
     elapsed_time = end_time - start_time

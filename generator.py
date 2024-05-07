@@ -56,7 +56,15 @@ def filter_relevant_conditions(input_string):
     filtered_string = re.sub(r'^(?:\s*\b(and|or)\b\s*)+', '', filtered_string)
     filtered_string = re.sub(r'(?:\s*\b(and|or)\b\s*)+$', '', filtered_string)
     return filtered_string
-
+def remove_pattern_expressions(input_string): 
+    # This was made with a regex generatior https://regex-generator.olafneumann.org
+    pattern = r'\b\w+_\d+_\w+\b\s*([=!><]=?)\s*\S+|\S+\s*([=!><]=?)\s*\b\w+_\d+_\w+\b'
+    result_string = re.sub(pattern, '', input_string)
+    result_string = re.sub(r'\s*\b(and|or)\b\s*(and|or)\b\s*', ' and ', result_string)
+    result_string = re.sub(r'\s{2,}', ' ', result_string).strip()
+    result_string = re.sub(r'^(?:\s*\b(and|or)\b\s*)+', '', result_string)
+    result_string = re.sub(r'(?:\s*\b(and|or)\b\s*)+$', '', result_string)
+    return result_string
 def add_h_row_prefix(input_string):
     keywords = ['cust', 'prod', 'day', 'month', 'year', 'state', 'quant', 'date']
     keyword_pattern = re.compile(r'\b(' + '|'.join(re.escape(k) for k in keywords) + r')\b(?! *\])')
@@ -108,7 +116,7 @@ def main(s, n, v, f, sigma, g):
     
     aggInstanceNumbered = """"""
     for z in range(n):
-        eval_string_h = f"{filter_relevant_conditions(transform_condition_string(predicates[z]))}"
+        eval_string_h = f"{remove_pattern_expressions(filter_relevant_conditions(transform_condition_string(predicates[z])))}"
         if eval_string_h:
             optimizationAgg += f"""
         isUsed = True
@@ -158,7 +166,7 @@ def main(s, n, v, f, sigma, g):
     aggInstanceCode = """"""
     for z in range(n):
         aggInstanceCode += f"""
-    eval_string = "{add_h_row_prefix(transform_condition_string(predicates[z]))}"
+    eval_string = "{having_to_condition(add_h_row_prefix(transform_condition_string(predicates[z])))}"
     h_table_aggrefunc_time_start = time.time()
     for key, h_row in instances.items():
         split_key = key.split('@')
@@ -227,16 +235,12 @@ def main(s, n, v, f, sigma, g):
     having = f""" 
     keys_to_remove = []
     if {having_clause != ""}:
-        having_time_start = time.time()
-        having_string = "{having_to_condition(having_clause)}"
+        having_string = "{having_to_condition(add_h_row_prefix(having_clause))}"
         for key, h_row in instances.items():
             if not(eval(having_string)):
                 keys_to_remove.append(key)
         for key in keys_to_remove:
             del instances[key]
-        having_time_end = time.time()
-        having_time_total = having_time_end - having_time_start
-        print(f" Having Time executed in {{having_time_total:.2f}} seconds.")
     """
     
     
