@@ -1,24 +1,28 @@
 SQL:
-CREATE VIEW Q1 as
-    SELECT cust, Q1sum = sum(quant), Q1avg = avg(quant)
-    FROM sales
-    WHERE state = 'NY'
-    GROUP BY cust
-CREATE VIEW Q2 as
-    SELECT cust, Q2sum = sum(quant), Q2avg = avg(quant)
-    FROM sales
-    WHERE state = 'NJ'
-    GROUP BY cust
-CREATE VIEW Q3 as
-    SELECT cust, Q3sum = sum(quant), Q3avg = avg(quant)
-    FROM sales
-    WHERE state = 'CT'
-    GROUP BY cust
-
-SELECT cust, Q1.sum, Q1.avg, Q2.sum, Q2.avg, Q3.sum, Q3.avg
-FROM Q1, Q2, Q3
-GROUP BY cust
-HAVING Q1.sum > 2 * Q2.sum OR Q1.avg > Q3.avg
+create view Q1 as 
+	select sales.cust, sum(sales.quant) as Q1sum, avg(sales.quant) as Q1avg
+	from sales
+	where sales.state = 'NY'
+	group by sales.cust;
+	
+create view Q2 as 
+	select sales.cust, sum(sales.quant) as Q2sum, avg(sales.quant) as Q2avg
+	from sales
+	where sales.state = 'NJ'
+	group by sales.cust;
+	
+create view Q3 as 
+	select sales.cust, sum(sales.quant) as Q3sum, avg(sales.quant) as Q3avg
+	from sales
+	where sales.state = 'CT'
+	group by sales.cust;
+	
+Select Q1.cust, Q1.Q1sum, Q1.Q1avg, Q2.Q2sum, Q2.Q2avg, Q3.Q3sum, Q3.Q3avg
+from Q1
+join Q2 on Q1.cust = Q2.cust
+join Q3 on Q1.cust = Q3.cust
+group by Q1.cust, Q1.Q1sum, Q1.Q1avg, Q2.Q2sum, Q2.Q2avg, Q3.Q3sum, Q3.Q3avg
+having Q1.Q1sum > 2* Q2.Q2sum or Q1.Q1avg >Q3.Q3avg
 
 EMF:
 SELECT cust, sum(1.quant), avg(1.quant), sum(2.quant), avg(2.quant), sum(3.quant), avg(3.quant)

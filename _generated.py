@@ -10,20 +10,29 @@ from dotenv import load_dotenv
 
 class H:
 
-    def __init__(mysillyobject, prod, year, sum_1_quant, avg_2_quant):
+    def __init__(mysillyobject, cust, sum_1_quant, avg_1_quant, sum_2_quant, avg_2_quant, sum_3_quant, avg_3_quant):
         
         
-        mysillyobject.prod = prod
-        
-        
-        mysillyobject.year = year
+        mysillyobject.cust = cust
         
         
 
         mysillyobject.sum_1_quant = sum_1_quant
         
 
+        mysillyobject.avg_1_quant = avg_1_quant
+        
+
+        mysillyobject.sum_2_quant = sum_2_quant
+        
+
         mysillyobject.avg_2_quant = avg_2_quant
+        
+
+        mysillyobject.sum_3_quant = sum_3_quant
+        
+
+        mysillyobject.avg_3_quant = avg_3_quant
         
     
     
@@ -37,7 +46,7 @@ def query():
     conn = psycopg2.connect(host = 'localhost', dbname = dbname, user = user, password = password, port = 5432)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     start_time = time.time()
-    cur.execute(f"SELECT prod, year, quant FROM sales")  
+    cur.execute(f"SELECT cust, state, quant FROM sales")  
     
     
     instances = {}
@@ -46,25 +55,41 @@ def query():
         
     agg_instance1 = []
         
+    agg_instance2 = []
+        
     for row in cur:
         # Create a unique key
         attributesFormattedForKey = ""
         hInstan = {}
-        for x in ['prod', 'year']:
+        for x in ['cust']:
             attributesFormattedForKey += f"{x}-{row[x]}@"
             hInstan[x] = row[x]
         attributesFormattedForKey = attributesFormattedForKey[:-1]
         #adds placeholder values in H class for aggregate functions
-        for y in ['sum_1_quant', 'avg_2_quant']:
+        for y in ['sum_1_quant', 'avg_1_quant', 'sum_2_quant', 'avg_2_quant', 'sum_3_quant', 'avg_3_quant']:
             hInstan[y] = None
         key = attributesFormattedForKey
         if key not in instances:
             instances[key] = H(**hInstan)
         
         
-        agg_instance0.append(row)  
+        isUsed = True
+        if not(eval("row['state'] == 'NY'")):
+            isUsed = False  
+        if isUsed:
+            agg_instance0.append(row)  
         
-        agg_instance1.append(row)  
+        isUsed = True
+        if not(eval("row['state'] == 'NJ'")):
+            isUsed = False  
+        if isUsed:
+            agg_instance1.append(row)  
+        
+        isUsed = True
+        if not(eval("row['state'] == 'CT'")):
+            isUsed = False  
+        if isUsed:
+            agg_instance2.append(row)  
         
     
     cur.scroll(0, mode='absolute')
@@ -76,7 +101,7 @@ def query():
     max_size = 10000    #Preallocating the space for the list
 
     
-    eval_string = "row['prod'] == h_row.prod and row['year'] == h_row.year"
+    eval_string = "row['state'] == 'NY' and row['cust'] == h_row.cust"
     h_table_aggrefunc_time_start = time.time()
     for key, h_row in instances.items():
         split_key = key.split('@')
@@ -92,7 +117,7 @@ def query():
         such_that_time_end = time.time()
         such_that_time_total =  such_that_time_end -  such_that_time_start
         print(f" Such That Mini Table 0 Time executed in {such_that_time_total:.2f} seconds.")
-        for x in ['sum_1_quant', 'avg_2_quant']: # for calculating the aggregate functions for the H-class table
+        for x in ['sum_1_quant', 'avg_1_quant', 'sum_2_quant', 'avg_2_quant', 'sum_3_quant', 'avg_3_quant']: # for calculating the aggregate functions for the H-class table
             split_x = x.split("_")
             if split_x[0] == "sum" and split_x[1] == str(1):
                 sum = 0
@@ -140,7 +165,7 @@ def query():
     h_table_aggrefunc_time_total = h_table_aggrefunc_time_end - h_table_aggrefunc_time_start
     print(f" H Table AggreFunc 0 Time executed in {h_table_aggrefunc_time_total:.2f} seconds.")
     
-    eval_string = "row['prod'] == h_row.prod"
+    eval_string = "row['state'] == 'NJ' and row['cust'] == h_row.cust"
     h_table_aggrefunc_time_start = time.time()
     for key, h_row in instances.items():
         split_key = key.split('@')
@@ -156,7 +181,7 @@ def query():
         such_that_time_end = time.time()
         such_that_time_total =  such_that_time_end -  such_that_time_start
         print(f" Such That Mini Table 1 Time executed in {such_that_time_total:.2f} seconds.")
-        for x in ['sum_1_quant', 'avg_2_quant']: # for calculating the aggregate functions for the H-class table
+        for x in ['sum_1_quant', 'avg_1_quant', 'sum_2_quant', 'avg_2_quant', 'sum_3_quant', 'avg_3_quant']: # for calculating the aggregate functions for the H-class table
             split_x = x.split("_")
             if split_x[0] == "sum" and split_x[1] == str(2):
                 sum = 0
@@ -204,11 +229,75 @@ def query():
     h_table_aggrefunc_time_total = h_table_aggrefunc_time_end - h_table_aggrefunc_time_start
     print(f" H Table AggreFunc 1 Time executed in {h_table_aggrefunc_time_total:.2f} seconds.")
     
+    eval_string = "row['state'] == 'CT' and row['cust'] == h_row.cust"
+    h_table_aggrefunc_time_start = time.time()
+    for key, h_row in instances.items():
+        split_key = key.split('@')
+        split_key = [pair.split('-') for pair in split_key]
+        agg_instance_temp = [None] * max_size
+        curr_size = 0
+
+        such_that_time_start = time.time()
+        for row in agg_instance2:
+            if eval(eval_string):
+                agg_instance_temp[curr_size] = row
+                curr_size += 1  
+        such_that_time_end = time.time()
+        such_that_time_total =  such_that_time_end -  such_that_time_start
+        print(f" Such That Mini Table 2 Time executed in {such_that_time_total:.2f} seconds.")
+        for x in ['sum_1_quant', 'avg_1_quant', 'sum_2_quant', 'avg_2_quant', 'sum_3_quant', 'avg_3_quant']: # for calculating the aggregate functions for the H-class table
+            split_x = x.split("_")
+            if split_x[0] == "sum" and split_x[1] == str(3):
+                sum = 0
+                for l in range(curr_size): 
+                    sum += agg_instance_temp[l][split_x[2]]
+                setattr(instances[key], x, sum)
+                
+            elif split_x[0] == "count" and split_x[1] == str(3) :
+                setattr(instances[key], x, curr_size)
+
+            elif split_x[0] == "min" and split_x[1] == str(3) :
+                first = True
+                for l in range(curr_size):
+                    if first:
+                        min = agg_instance_temp[l][split_x[2]]
+                        first = False
+                    else:
+                        if agg_instance_temp[l][split_x[2]] < min:
+                            min = agg_instance_temp[l][split_x[2]]
+                setattr(instances[key], x, min)
+
+            elif split_x[0] == "max" and split_x[1] == str(3) :
+                first = True
+                for l in range(curr_size):
+                    if first:
+                        max = agg_instance_temp[l][split_x[2]]
+                        first = False
+                    else:
+                        if (agg_instance_temp[l][split_x[2]] > max):
+                            max = agg_instance_temp[l][split_x[2]]
+                setattr(instances[key], x, max)
+            
+            if split_x[0] == "avg" and split_x[1] == str(3) :
+                sum = 0
+                for l in range(curr_size): 
+                    sum += agg_instance_temp[l][split_x[2]]
+                if curr_size != 0:
+                    avg = sum/curr_size
+                else:
+                    avg = 0
+                setattr(instances[key], x, avg)
+                            
+        cur.scroll(0, mode='absolute')
+    h_table_aggrefunc_time_end = time.time()
+    h_table_aggrefunc_time_total = h_table_aggrefunc_time_end - h_table_aggrefunc_time_start
+    print(f" H Table AggreFunc 2 Time executed in {h_table_aggrefunc_time_total:.2f} seconds.")
+    
     
      
     keys_to_remove = []
-    if True:
-        having_string = "h_row.sum_1_quant > 2 * h_row.avg_2_quant"
+    if False:
+        having_string = ""
         for key, h_row in instances.items():
             if not(eval(having_string)):
                 keys_to_remove.append(key)

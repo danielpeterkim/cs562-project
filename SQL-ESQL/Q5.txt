@@ -1,17 +1,19 @@
 SQL:
-CREATE VIEW Q1 as
-    SELECT prod, year, Q1sum = sum(quant)
-    FROM sales
-    GROUP BY prod, year
-CREATE VIEW Q2 as
-    SELECT prod, Q2avg = avg(quant)
-    FROM sales
-    GROUP BY prod
+Create table Q1 as
+    select sales.prod, sales.year, sum(sales.quant) as Q1sum
+    from sales
+    group by sales.prod, sales.year;
 
-SELECT prod, year, Q1.sum, Q2.avg
-FROM Q1, Q2
-GROUP BY prod
-HAVING Q1.sum > 0.25 * avg(2.quant)
+create table q2 as
+    select sales.prod, avg(sales.quant) as Q2avg
+    from sales
+    group by sales.prod;
+
+select Q1.prod, Q1.year, Q1.Q1sum, Q2.Q2avg
+from Q1
+Join Q2 on Q1.prod = Q2.prod
+group by Q1.prod, Q1.year, Q1.Q1sum, Q2.Q2avg
+having Q1.Q1sum > (2 * Q2.Q2avg)
 
 EMF:
 SELECT prod, year, sum(1.quant), avg(2.quant)
