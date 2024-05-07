@@ -1,7 +1,7 @@
 SQL:
 SELECT cust, sum(quant), avg(quant), max(quant), min(quant), count(quant)
 FROM sales
-WHERE year = 2016
+WHERE year = 2016 and state = 'NY'
 GROUP BY cust
 
 EMF:

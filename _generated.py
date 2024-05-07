@@ -296,8 +296,8 @@ def query():
     
      
     keys_to_remove = []
-    if False:
-        having_string = ""
+    if True:
+        having_string = "h_row.sum_1_quant > 2* h_row.sum_2_quant or h_row.avg_1_quant > h_row.avg_3_quant"
         for key, h_row in instances.items():
             if not(eval(having_string)):
                 keys_to_remove.append(key)
